@@ -6,977 +6,356 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root {
-      --bg: #030B1A;
-      --bg2: #06112a;
-      --gold: #F59E0B;
-      --gold2: #FBBF24;
-      --cyan: #06B6D4;
-      --cyan2: #22D3EE;
-      --purple: #7C3AED;
-      --purple2: #A78BFA;
-      --green: #10B981;
-      --card-bg: rgba(6, 17, 42, 0.7);
-      --border: rgba(245, 158, 11, 0.15);
-      --text: #E2EAF4;
-      --text-dim: rgba(226, 234, 244, 0.45);
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
-      background: var(--bg);
-      font-family: 'Space Grotesk', sans-serif;
-      color: var(--text);
+      background: #080E1A;
+      font-family: 'Inter', sans-serif;
+      color: #C8D8E8;
       overflow-x: hidden;
     }
 
-    canvas#bg {
+    canvas {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      inset: 0;
       z-index: 0;
     }
 
-    .noise {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      pointer-events: none;
-    }
-
-    .grid-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      background-image:
-        linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245, 158, 11, 0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-    }
-
-    .glows {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      animation: driftGlow 20s infinite ease-in-out alternate;
-    }
-
-    .glow-1 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(124, 58, 237, 0.35) 0%, transparent 70%);
-      top: -100px; left: -100px;
-      animation-duration: 25s;
-    }
-    .glow-2 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, transparent 70%);
-      bottom: -100px; right: -50px;
-      animation-duration: 30s; animation-delay: 5s;
-    }
-    .glow-3 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
-      top: 40%; left: 50%;
-      animation-duration: 22s; animation-delay: 10s;
-    }
-
-    @keyframes driftGlow {
-      0% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(60px, 40px) scale(1.15); }
-      66% { transform: translate(-40px, 80px) scale(0.9); }
-      100% { transform: translate(30px, -60px) scale(1.05); }
-    }
-
-    .page {
+    .wrap {
       position: relative;
-      z-index: 2;
+      z-index: 1;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2.5rem 1.2rem 4rem;
-      gap: 2rem;
-      max-width: 980px;
-      margin: 0 auto;
-    }
-
-    .nav-bar {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.8rem 1.5rem;
-      background: rgba(6, 17, 42, 0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-    }
-
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .nav-logo-icon {
-      width: 34px; height: 34px;
-      background: linear-gradient(135deg, var(--gold), var(--purple));
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 0.9rem;
-      color: #fff;
+      padding: 2rem 1rem;
+      gap: 2.5rem;
     }
 
-    .nav-logo-text {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: 2px;
-      background: linear-gradient(90deg, var(--gold), var(--cyan));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .nav-status {
-      display: flex;
+    .badge {
+      display: inline-flex;
       align-items: center;
       gap: 7px;
-      font-size: 0.75rem;
+      padding: 6px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 50px;
+      font-size: 0.7rem;
       font-weight: 600;
-      letter-spacing: 1.5px;
-      color: var(--green);
+      letter-spacing: 2px;
       text-transform: uppercase;
+      color: #5EEAD4;
     }
 
-    .status-dot {
-      width: 7px; height: 7px;
-      background: var(--green);
+    .dot-live {
+      width: 6px; height: 6px;
+      background: #22C55E;
       border-radius: 50%;
-      animation: pulse 2s infinite;
+      animation: blink 2s infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
-      50% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+    @keyframes blink {
+      0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+      50% { opacity: .8; box-shadow: 0 0 0 5px rgba(34,197,94,0); }
     }
 
     .hero {
       text-align: center;
-      padding: 2.5rem 1rem 1.5rem;
-      position: relative;
     }
 
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 14px;
-      background: rgba(245, 158, 11, 0.08);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      border-radius: 50px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      color: var(--gold2);
-      text-transform: uppercase;
-      margin-bottom: 1.5rem;
-    }
-
-    .hero-eyebrow i { font-size: 0.6rem; }
-
-    .hero-title {
+    .hero h1 {
       font-family: 'Syne', sans-serif;
-      font-size: 4.5rem;
+      font-size: clamp(3.2rem, 9vw, 6rem);
       font-weight: 800;
-      letter-spacing: 6px;
+      letter-spacing: 4px;
       line-height: 1;
-      margin-bottom: 0.5rem;
-      position: relative;
+      margin-bottom: 0.8rem;
     }
 
-    .hero-title .word-nexus {
-      background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 40%, var(--cyan) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      filter: drop-shadow(0 0 30px rgba(245, 158, 11, 0.4));
-    }
+    .hero h1 span.n { color: #F59E0B; }
+    .hero h1 span.m { color: #5EEAD4; }
 
-    .hero-title .word-md {
-      background: linear-gradient(135deg, var(--cyan) 0%, var(--purple2) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .hero-sub {
-      font-size: 1rem;
-      color: var(--text-dim);
+    .hero p {
+      font-size: 0.85rem;
       font-weight: 400;
-      letter-spacing: 3px;
+      letter-spacing: 4px;
       text-transform: uppercase;
-      margin-bottom: 1.5rem;
+      color: rgba(200,216,232,0.4);
     }
 
-    .hero-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 22px;
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      border-radius: 50px;
-      font-size: 0.78rem;
-      color: var(--text-dim);
-      cursor: default;
-    }
-
-    .stats-row {
+    .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+      gap: 1px;
       width: 100%;
-    }
-
-    .stat-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 1.6rem 1rem;
-      text-align: center;
-      position: relative;
+      max-width: 780px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
       overflow: hidden;
-      transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
     }
 
-    .stat-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent, var(--gold)), transparent);
+    .stat {
+      background: rgba(8,14,26,0.9);
+      padding: 1.8rem 1rem;
+      text-align: center;
+      transition: background .3s;
     }
 
-    .stat-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(245, 158, 11, 0.35);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(245, 158, 11, 0.08);
-    }
+    .stat:hover { background: rgba(255,255,255,0.03); }
 
-    .stat-icon {
-      width: 42px; height: 42px;
-      border-radius: 12px;
-      background: rgba(245, 158, 11, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 0.9rem;
-      font-size: 1rem;
-      color: var(--accent, var(--gold));
-    }
-
-    .stat-num {
+    .stat-n {
       font-family: 'JetBrains Mono', monospace;
       font-size: 1.7rem;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 0.25rem;
-      line-height: 1;
+      margin-bottom: 0.3rem;
     }
 
-    .stat-label {
-      font-size: 0.65rem;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
+    .stat-l {
+      font-size: 0.62rem;
       font-weight: 600;
-    }
-
-    .stats-row2 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      width: 100%;
-      margin-top: -0.5rem;
-    }
-
-    .action-section {
-      width: 100%;
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 2.5rem 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .action-section::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 3px;
-      background: linear-gradient(90deg, var(--purple), var(--cyan), var(--gold), var(--purple));
-      background-size: 200% 100%;
-      animation: shimmer 4s linear infinite;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 0% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    .section-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .section-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 0.5rem;
-    }
-
-    .section-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #fff;
       letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(200,216,232,0.35);
     }
 
-    .action-grid {
+    .actions {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.2rem;
+      gap: 1rem;
+      width: 100%;
+      max-width: 780px;
     }
 
-    .action-btn {
+    .btn {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.8rem;
-      padding: 1.8rem 1.5rem;
-      background: rgba(255, 255, 255, 0.02);
+      gap: 0.7rem;
+      padding: 1.8rem 1.6rem;
+      background: rgba(255,255,255,0.025);
       border: 1px solid rgba(255,255,255,0.07);
       border-radius: 18px;
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-      overflow: hidden;
       text-decoration: none;
       color: inherit;
+      transition: all .35s ease;
       position: relative;
+      overflow: hidden;
     }
 
-    .action-btn::before {
+    .btn::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: var(--btn-grad, linear-gradient(135deg, rgba(245,158,11,0.08), rgba(6,182,212,0.08)));
+      background: var(--h, rgba(245,158,11,0.06));
       opacity: 0;
-      transition: opacity 0.4s ease;
+      transition: opacity .35s;
       border-radius: 18px;
     }
 
-    .action-btn:hover::before { opacity: 1; }
+    .btn:hover::after { opacity: 1; }
 
-    .action-btn:hover {
-      border-color: var(--btn-border, rgba(245,158,11,0.4));
-      transform: translateY(-6px);
-      box-shadow: 0 24px 48px rgba(0,0,0,0.35), 0 0 40px var(--btn-glow, rgba(245,158,11,0.12));
+    .btn:hover {
+      border-color: var(--b, rgba(245,158,11,0.3));
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
     }
 
-    .action-btn.primary {
-      --btn-grad: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(251,191,36,0.05));
-      --btn-border: rgba(245,158,11,0.5);
-      --btn-glow: rgba(245,158,11,0.15);
-      border-color: rgba(245,158,11,0.25);
-    }
+    .btn.a { --h: rgba(245,158,11,0.06); --b: rgba(245,158,11,0.35); }
+    .btn.b { --h: rgba(94,234,212,0.06); --b: rgba(94,234,212,0.35); }
+    .btn.c { --h: rgba(167,139,250,0.06); --b: rgba(167,139,250,0.3); }
 
-    .action-btn.secondary {
-      --btn-grad: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(34,211,238,0.05));
-      --btn-border: rgba(6,182,212,0.5);
-      --btn-glow: rgba(6,182,212,0.12);
-      border-color: rgba(6,182,212,0.2);
-    }
-
-    .action-btn.tertiary {
-      --btn-grad: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(167,139,250,0.05));
-      --btn-border: rgba(124,58,237,0.5);
-      --btn-glow: rgba(124,58,237,0.12);
-      border-color: rgba(124,58,237,0.2);
-    }
-
-    .btn-icon {
-      width: 50px; height: 50px;
-      border-radius: 14px;
+    .btn-ic {
+      width: 44px; height: 44px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       position: relative;
       z-index: 1;
     }
 
-    .action-btn.primary .btn-icon { background: rgba(245,158,11,0.12); color: var(--gold); }
-    .action-btn.secondary .btn-icon { background: rgba(6,182,212,0.12); color: var(--cyan); }
-    .action-btn.tertiary .btn-icon { background: rgba(124,58,237,0.12); color: var(--purple2); }
+    .btn.a .btn-ic { background: rgba(245,158,11,0.1); color: #F59E0B; }
+    .btn.b .btn-ic { background: rgba(94,234,212,0.1); color: #5EEAD4; }
+    .btn.c .btn-ic { background: rgba(167,139,250,0.1); color: #A78BFA; }
 
-    .btn-content { position: relative; z-index: 1; }
+    .btn-txt { position: relative; z-index: 1; }
 
     .btn-title {
       font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1px;
       color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .btn-desc {
-      font-size: 0.78rem;
-      color: var(--text-dim);
+      font-size: 0.75rem;
+      color: rgba(200,216,232,0.4);
       line-height: 1.4;
     }
 
-    .btn-arrow {
-      position: absolute;
-      right: 1.2rem;
-      bottom: 1.2rem;
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      opacity: 0;
-      transform: translateX(-6px);
-      transition: all 0.3s ease;
-    }
-
-    .action-btn:hover .btn-arrow {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .deploy-section {
-      width: 100%;
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 2.5rem 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .deploy-section::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 3px;
-      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold), var(--cyan));
-      background-size: 200% 100%;
-      animation: shimmer 6s linear infinite;
-    }
-
-    .deploy-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.9rem;
-    }
-
-    .deploy-card {
-      display: flex;
-      align-items: center;
-      gap: 0.9rem;
-      padding: 1.1rem 1.2rem;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 14px;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.35s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .deploy-card:hover {
-      background: rgba(255,255,255,0.04);
-      border-color: var(--dc, rgba(245,158,11,0.3));
-      transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
-    }
-
-    .deploy-icon-wrap {
-      width: 42px; height: 42px;
-      border-radius: 11px;
-      background: var(--di-bg, rgba(245,158,11,0.08));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: 1.1rem;
-      color: var(--dc, var(--gold));
-    }
-
-    .deploy-text .deploy-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 800;
+    .foot {
+      font-size: 0.72rem;
+      color: rgba(200,216,232,0.25);
       letter-spacing: 1px;
-      color: #fff;
-      margin-bottom: 2px;
     }
 
-    .deploy-text .deploy-desc {
-      font-size: 0.68rem;
-      color: var(--text-dim);
+    .foot span { color: rgba(200,216,232,0.5); }
+
+    @media (max-width: 680px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .actions { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 3rem; }
     }
 
-    .deploy-card .deploy-arr {
-      margin-left: auto;
-      font-size: 0.7rem;
-      color: var(--text-dim);
-      opacity: 0;
-      transform: translateX(-4px);
-      transition: all 0.3s ease;
-    }
-
-    .deploy-card:hover .deploy-arr {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .features-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      width: 100%;
-    }
-
-    .feature-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(14px);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 1.6rem 1.4rem;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      bottom: 0; right: 0;
-      width: 80px; height: 80px;
-      background: radial-gradient(circle, var(--fc, rgba(245,158,11,0.12)) 0%, transparent 70%);
-      border-radius: 50%;
-    }
-
-    .feature-card:hover {
-      border-color: rgba(245,158,11,0.3);
-      transform: translateY(-4px);
-    }
-
-    .feature-icon {
-      width: 46px; height: 46px;
-      border-radius: 13px;
-      background: var(--fi-bg, rgba(245,158,11,0.08));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      color: var(--fi-color, var(--gold));
-      margin-bottom: 1rem;
-    }
-
-    .feature-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: 1px;
-      margin-bottom: 0.4rem;
-    }
-
-    .feature-desc {
-      font-size: 0.78rem;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
-    .footer {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.2rem 1.5rem;
-      border-top: 1px solid var(--border);
-      font-size: 0.78rem;
-      color: var(--text-dim);
-    }
-
-    .footer-brand {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 0.85rem;
-      background: linear-gradient(90deg, var(--gold), var(--cyan));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: 2px;
-    }
-
-    .footer a { color: var(--cyan); text-decoration: none; transition: color 0.3s; }
-    .footer a:hover { color: var(--gold); }
-
-    @media (max-width: 800px) {
-      .stats-row, .stats-row2 { grid-template-columns: repeat(2, 1fr); }
-      .action-grid { grid-template-columns: 1fr 1fr; }
-      .action-btn.tertiary { grid-column: span 2; }
-      .deploy-grid { grid-template-columns: 1fr 1fr; }
-      .features-row { grid-template-columns: 1fr; }
-      .hero-title { font-size: 3rem; }
-      .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-    }
-
-    @media (max-width: 520px) {
-      .stats-row, .stats-row2 { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
-      .action-grid { grid-template-columns: 1fr; }
-      .action-btn.tertiary { grid-column: span 1; }
-      .deploy-grid { grid-template-columns: 1fr; }
-      .hero-title { font-size: 2.3rem; letter-spacing: 4px; }
-      .nav-bar { padding: 0.7rem 1rem; }
+    @media (max-width: 380px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat { padding: 1.2rem 0.7rem; }
     }
   </style>
 </head>
 <body>
-  <canvas id="bg"></canvas>
-  <div class="noise"></div>
-  <div class="grid-overlay"></div>
-  <div class="glows">
-    <div class="glow glow-1"></div>
-    <div class="glow glow-2"></div>
-    <div class="glow glow-3"></div>
-  </div>
+  <canvas id="c"></canvas>
+  <div class="wrap">
 
-  <div class="page">
-
-    <nav class="nav-bar">
-      <div class="nav-logo">
-        <div class="nav-logo-icon"><i class="fas fa-hexagon"></i></div>
-        <span class="nav-logo-text">NEXUS-MD</span>
-      </div>
-      <div class="nav-status">
-        <div class="status-dot"></div>
-        <span id="serverStatus">ALL SYSTEMS ONLINE</span>
-      </div>
-    </nav>
+    <div class="badge">
+      <span class="dot-live"></span>
+      <span id="srv">All Systems Online</span>
+    </div>
 
     <div class="hero">
-      <div class="hero-eyebrow">
-        <i class="fas fa-bolt"></i>
-        WhatsApp Session Generator
+      <h1><span class="n">NEXUS</span><span class="m">-MD</span></h1>
+      <p>WhatsApp Session Generator</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-n" id="s1">--</div>
+        <div class="stat-l">Total Sessions</div>
       </div>
-      <h1 class="hero-title">
-        <span class="word-nexus">NEXUS</span><span class="word-md">-MD</span>
-      </h1>
-      <p class="hero-sub">Next-Generation Session Platform</p>
-      <div class="hero-cta">
-        <i class="fas fa-lock" style="color:var(--green);font-size:0.65rem;"></i>
-        End-to-end encrypted &nbsp;·&nbsp; Instant generation &nbsp;·&nbsp; Multi-platform
+      <div class="stat">
+        <div class="stat-n" id="s2">--</div>
+        <div class="stat-l">Today</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="s3">--%</div>
+        <div class="stat-l">Success Rate</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="s4">--</div>
+        <div class="stat-l">Countries</div>
       </div>
     </div>
 
-    <div class="stats-row">
-      <div class="stat-card" style="--accent: var(--gold);">
-        <div class="stat-icon" style="background:rgba(245,158,11,0.08);color:var(--gold);"><i class="fas fa-users"></i></div>
-        <div class="stat-num" id="totalPairings">--</div>
-        <div class="stat-label">Total Sessions</div>
-      </div>
-      <div class="stat-card" style="--accent: var(--cyan);">
-        <div class="stat-icon" style="background:rgba(6,182,212,0.08);color:var(--cyan);"><i class="fas fa-chart-bar"></i></div>
-        <div class="stat-num" id="todayPairings">--</div>
-        <div class="stat-label">Today</div>
-      </div>
-      <div class="stat-card" style="--accent: var(--green);">
-        <div class="stat-icon" style="background:rgba(16,185,129,0.08);color:var(--green);"><i class="fas fa-check-circle"></i></div>
-        <div class="stat-num" id="successRate">--%</div>
-        <div class="stat-label">Success Rate</div>
-      </div>
-      <div class="stat-card" style="--accent: var(--purple2);">
-        <div class="stat-icon" style="background:rgba(124,58,237,0.08);color:var(--purple2);"><i class="fas fa-globe"></i></div>
-        <div class="stat-num" id="countriesServed">--</div>
-        <div class="stat-label">Countries</div>
-      </div>
-    </div>
-
-    <div class="stats-row2">
-      <div class="stat-card" style="--accent:#F87171;">
-        <div class="stat-icon" style="background:rgba(248,113,113,0.08);color:#F87171;"><i class="fas fa-signal"></i></div>
-        <div class="stat-num" id="activeUsers">--</div>
-        <div class="stat-label">Online Now</div>
-      </div>
-      <div class="stat-card" style="--accent: var(--cyan);">
-        <div class="stat-icon" style="background:rgba(6,182,212,0.08);color:var(--cyan);"><i class="fas fa-link"></i></div>
-        <div class="stat-num" id="codePairings">--</div>
-        <div class="stat-label">Code Pairs</div>
-      </div>
-      <div class="stat-card" style="--accent: var(--gold);">
-        <div class="stat-icon" style="background:rgba(245,158,11,0.08);color:var(--gold);"><i class="fas fa-qrcode"></i></div>
-        <div class="stat-num" id="qrPairings">--</div>
-        <div class="stat-label">QR Pairs</div>
-      </div>
-      <div class="stat-card" style="--accent: var(--purple2);">
-        <div class="stat-icon" style="background:rgba(124,58,237,0.08);color:var(--purple2);"><i class="fas fa-server"></i></div>
-        <div class="stat-num" id="uptime">--</div>
-        <div class="stat-label">Uptime (Days)</div>
-      </div>
-    </div>
-
-    <div class="action-section">
-      <div class="section-header">
-        <div class="section-label"><i class="fas fa-play-circle"></i> &nbsp; Quick Start</div>
-        <div class="section-title">Generate Your Session</div>
-      </div>
-      <div class="action-grid">
-        <a href="/pair" class="action-btn primary">
-          <div class="btn-icon"><i class="fas fa-mobile-alt"></i></div>
-          <div class="btn-content">
-            <div class="btn-title">Pair Code</div>
-            <div class="btn-desc">Connect using your phone number with a 8-digit pair code</div>
-          </div>
-          <i class="fas fa-arrow-right btn-arrow"></i>
-        </a>
-        <a href="/qr" target="_blank" class="action-btn secondary">
-          <div class="btn-icon"><i class="fas fa-qrcode"></i></div>
-          <div class="btn-content">
-            <div class="btn-title">QR Scan</div>
-            <div class="btn-desc">Scan a QR code directly from WhatsApp linked devices</div>
-          </div>
-          <i class="fas fa-arrow-right btn-arrow"></i>
-        </a>
-        <a href="https://github.com/vinpink2/JUNE-X" target="_blank" class="action-btn tertiary">
-          <div class="btn-icon"><i class="fab fa-github"></i></div>
-          <div class="btn-content">
-            <div class="btn-title">Source Code</div>
-            <div class="btn-desc">View and fork the open-source project on GitHub</div>
-          </div>
-          <i class="fas fa-arrow-right btn-arrow"></i>
-        </a>
-      </div>
-    </div>
-
-    <div class="deploy-section">
-      <div class="section-header">
-        <div class="section-label"><i class="fas fa-rocket"></i> &nbsp; Hosting</div>
-        <div class="section-title">Deploy Platforms</div>
-      </div>
-      <div class="deploy-grid">
-        <a href="https://heroku.com/deploy?template=https://github.com/vinpink2/JUNE-X" target="_blank" class="deploy-card" style="--dc:rgba(139,92,246,0.8);--di-bg:rgba(139,92,246,0.1);">
-          <div class="deploy-icon-wrap" style="--dc:rgba(139,92,246,0.8);--di-bg:rgba(139,92,246,0.1);">
-            <i class="fas fa-cube" style="color:#8B5CF6;"></i>
-          </div>
-          <div class="deploy-text">
-            <div class="deploy-name">HEROKU</div>
-            <div class="deploy-desc">One-click auto-scaling cloud</div>
-          </div>
-          <i class="fas fa-arrow-right deploy-arr"></i>
-        </a>
-        <a href="https://render.com/deploy?repo=https://github.com/vinpink2/JUNE-X" target="_blank" class="deploy-card">
-          <div class="deploy-icon-wrap"><i class="fas fa-server" style="color:var(--gold);"></i></div>
-          <div class="deploy-text">
-            <div class="deploy-name">RENDER</div>
-            <div class="deploy-desc">Free tier with auto-deploy</div>
-          </div>
-          <i class="fas fa-arrow-right deploy-arr"></i>
-        </a>
-        <a href="https://platform.cypherx.space/" target="_blank" class="deploy-card" style="--dc:rgba(6,182,212,0.8);">
-          <div class="deploy-icon-wrap" style="background:rgba(6,182,212,0.08)"><i class="fas fa-bolt" style="color:var(--cyan);"></i></div>
-          <div class="deploy-text">
-            <div class="deploy-name">CYPHERX</div>
-            <div class="deploy-desc">Bot hosting with web dashboard</div>
-          </div>
-          <i class="fas fa-arrow-right deploy-arr"></i>
-        </a>
-        <a href="https://bot-hosting.net/" target="_blank" class="deploy-card" style="--dc:rgba(248,113,113,0.8);">
-          <div class="deploy-icon-wrap" style="background:rgba(248,113,113,0.08)"><i class="fas fa-robot" style="color:#F87171;"></i></div>
-          <div class="deploy-text">
-            <div class="deploy-name">PANEL HOSTING</div>
-            <div class="deploy-desc">Pterodactyl panel hosting</div>
-          </div>
-          <i class="fas fa-arrow-right deploy-arr"></i>
-        </a>
-        <a href="https://replit.com/github/vinpink2/JUNE-X" target="_blank" class="deploy-card" style="--dc:rgba(251,146,60,0.8);">
-          <div class="deploy-icon-wrap" style="background:rgba(251,146,60,0.08)"><i class="fas fa-code" style="color:#FB923C;"></i></div>
-          <div class="deploy-text">
-            <div class="deploy-name">REPLIT</div>
-            <div class="deploy-desc">Browser IDE with instant deploy</div>
-          </div>
-          <i class="fas fa-arrow-right deploy-arr"></i>
-        </a>
-        <a href="https://daki.cc/" target="_blank" class="deploy-card" style="--dc:rgba(167,139,250,0.8);">
-          <div class="deploy-icon-wrap" style="background:rgba(167,139,250,0.08)"><i class="fas fa-cloud-upload-alt" style="color:var(--purple2);"></i></div>
-          <div class="deploy-text">
-            <div class="deploy-name">DAKI.CC</div>
-            <div class="deploy-desc">Fast cloud instant deployment</div>
-          </div>
-          <i class="fas fa-arrow-right deploy-arr"></i>
-        </a>
-      </div>
-    </div>
-
-    <div class="features-row">
-      <div class="feature-card" style="--fc:rgba(16,185,129,0.15);">
-        <div class="feature-icon" style="--fi-bg:rgba(16,185,129,0.08);--fi-color:var(--green);">
-          <i class="fas fa-shield-alt"></i>
+    <div class="actions">
+      <a href="/pair" class="btn a">
+        <div class="btn-ic"><i class="fas fa-mobile-alt"></i></div>
+        <div class="btn-txt">
+          <div class="btn-title">Pair Code</div>
+          <div class="btn-desc">Connect with your phone number</div>
         </div>
-        <div class="feature-title">End-to-End Encrypted</div>
-        <div class="feature-desc">All session credentials are encrypted using industry-standard protocols before delivery.</div>
-      </div>
-      <div class="feature-card" style="--fc:rgba(245,158,11,0.15);">
-        <div class="feature-icon" style="--fi-bg:rgba(245,158,11,0.08);--fi-color:var(--gold);">
-          <i class="fas fa-bolt"></i>
+      </a>
+      <a href="/qr" target="_blank" class="btn b">
+        <div class="btn-ic"><i class="fas fa-qrcode"></i></div>
+        <div class="btn-txt">
+          <div class="btn-title">QR Scan</div>
+          <div class="btn-desc">Scan QR code to connect</div>
         </div>
-        <div class="feature-title">Lightning Fast</div>
-        <div class="feature-desc">Session generation completes in under 30 seconds with our optimized Baileys connection.</div>
-      </div>
-      <div class="feature-card" style="--fc:rgba(6,182,212,0.15);">
-        <div class="feature-icon" style="--fi-bg:rgba(6,182,212,0.08);--fi-color:var(--cyan);">
-          <i class="fas fa-layer-group"></i>
+      </a>
+      <a href="https://github.com/vinpink2/JUNE-X" target="_blank" class="btn c">
+        <div class="btn-ic"><i class="fab fa-github"></i></div>
+        <div class="btn-txt">
+          <div class="btn-title">Source Code</div>
+          <div class="btn-desc">View the project on GitHub</div>
         </div>
-        <div class="feature-title">Multi-Platform Deploy</div>
-        <div class="feature-desc">One session, deploy anywhere — Heroku, Render, CypherX, Panel, Replit, or Daki.</div>
-      </div>
+      </a>
     </div>
 
-    <footer class="footer">
-      <span class="footer-brand">NEXUS-MD</span>
-      <span>Secure WhatsApp Session Generator</span>
-      <a href="https://github.com/vinpink2/JUNE-X" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-    </footer>
+    <p class="foot">NEXUS-MD &nbsp;·&nbsp; <span>Secure</span> &nbsp;·&nbsp; <span>Encrypted</span> &nbsp;·&nbsp; <span>Fast</span></p>
 
   </div>
 
   <script>
-    const canvas = document.getElementById('bg');
-    const ctx = canvas.getContext('2d');
-    let W, H, particles = [];
+    const c = document.getElementById('c');
+    const x = c.getContext('2d');
+    let W, H, pts = [];
 
-    function resize() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
+    const resize = () => {
+      W = c.width = window.innerWidth;
+      H = c.height = window.innerHeight;
+    };
     resize();
-    window.addEventListener('resize', () => { resize(); particles = []; init(); });
+    window.addEventListener('resize', () => { resize(); pts = []; init(); });
 
-    class Dot {
+    class P {
       constructor() { this.reset(); }
       reset() {
         this.x = Math.random() * W;
         this.y = Math.random() * H;
-        this.r = Math.random() * 1.5 + 0.3;
-        this.vx = (Math.random() - 0.5) * 0.35;
-        this.vy = (Math.random() - 0.5) * 0.35;
-        this.op = Math.random() * 0.4 + 0.05;
-        const c = [
-          `rgba(245,158,11,`,
-          `rgba(6,182,212,`,
-          `rgba(124,58,237,`,
-          `rgba(16,185,129,`
-        ];
-        this.col = c[Math.floor(Math.random() * c.length)];
+        this.r = Math.random() * 1.2 + .3;
+        this.vx = (Math.random() - .5) * .3;
+        this.vy = (Math.random() - .5) * .3;
+        this.a = Math.random() * .3 + .05;
+        const cols = ['rgba(245,158,11,', 'rgba(94,234,212,', 'rgba(167,139,250,'];
+        this.col = cols[Math.floor(Math.random() * cols.length)];
       }
-      tick() {
-        this.x += this.vx; this.y += this.vy;
-        if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-        ctx.fillStyle = this.col + this.op + ')';
-        ctx.fill();
-      }
+      move() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset(); }
+      draw() { x.beginPath(); x.arc(this.x, this.y, this.r, 0, Math.PI * 2); x.fillStyle = this.col + this.a + ')'; x.fill(); }
     }
 
-    function init() { for (let i = 0; i < 100; i++) particles.push(new Dot()); }
+    const init = () => { for (let i = 0; i < 80; i++) pts.push(new P()); };
     init();
 
-    function frame() {
-      ctx.clearRect(0, 0, W, H);
-      particles.forEach(p => { p.tick(); p.draw(); });
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const d = Math.sqrt(dx*dx + dy*dy);
-          if (d < 110) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(245,158,11,${0.06 * (1 - d/110)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+    const frame = () => {
+      x.clearRect(0, 0, W, H);
+      pts.forEach(p => { p.move(); p.draw(); });
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 100) {
+            x.beginPath(); x.moveTo(pts[i].x, pts[i].y); x.lineTo(pts[j].x, pts[j].y);
+            x.strokeStyle = `rgba(245,158,11,${.05 * (1 - d / 100)})`; x.lineWidth = .5; x.stroke();
           }
         }
       }
       requestAnimationFrame(frame);
-    }
+    };
     frame();
 
-    function animNum(el, end, dur, suffix) {
-      suffix = suffix || '';
-      const start = performance.now();
-      function step(now) {
-        const t = Math.min((now - start) / dur, 1);
-        const ease = 1 - Math.pow(1 - t, 3);
-        el.textContent = Math.floor(ease * end).toLocaleString() + suffix;
-        if (t < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    }
+    const anim = (el, to, ms, suf) => {
+      suf = suf || '';
+      const s = performance.now();
+      const go = t => {
+        const p = Math.min((t - s) / ms, 1), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.floor(e * to).toLocaleString() + suf;
+        if (p < 1) requestAnimationFrame(go);
+      };
+      requestAnimationFrame(go);
+    };
 
-    async function loadStats() {
+    const load = async () => {
       try {
         const d = await (await fetch('/api/stats')).json();
-        animNum(document.getElementById('totalPairings'), d.totalPairings, 2000);
-        animNum(document.getElementById('todayPairings'), d.todayPairings, 1500);
-        animNum(document.getElementById('successRate'), parseFloat(d.successRate), 1800, '%');
-        animNum(document.getElementById('countriesServed'), d.countriesServed, 1600);
-        animNum(document.getElementById('activeUsers'), d.activeUsers, 1200);
-        animNum(document.getElementById('codePairings'), d.codePairings, 1800);
-        animNum(document.getElementById('qrPairings'), d.qrPairings, 1800);
-        animNum(document.getElementById('uptime'), d.uptimeDays, 2000);
-        document.getElementById('serverStatus').textContent =
-          d.serverStatus === 'operational' ? 'ALL SYSTEMS ONLINE' : 'MAINTENANCE';
-      } catch(e) {
-        document.getElementById('serverStatus').textContent = 'CONNECTING...';
-      }
-    }
+        anim(document.getElementById('s1'), d.totalPairings, 2000);
+        anim(document.getElementById('s2'), d.todayPairings, 1500);
+        anim(document.getElementById('s3'), parseFloat(d.successRate), 1800, '%');
+        anim(document.getElementById('s4'), d.countriesServed, 1600);
+        document.getElementById('srv').textContent = d.serverStatus === 'operational' ? 'All Systems Online' : 'Maintenance';
+      } catch (_) {}
+    };
 
-    loadStats();
-    setInterval(loadStats, 30000);
+    load();
+    setInterval(load, 30000);
   </script>
 </body>
 </html>

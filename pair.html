@@ -6,188 +6,110 @@
   <title>NEXUS-MD | Pair Code</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root {
-      --bg: #030B1A;
-      --gold: #F59E0B;
-      --gold2: #FBBF24;
-      --cyan: #06B6D4;
-      --cyan2: #22D3EE;
-      --purple: #7C3AED;
-      --purple2: #A78BFA;
-      --green: #10B981;
-      --red: #EF4444;
-      --card-bg: rgba(6,17,42,0.75);
-      --border: rgba(245,158,11,0.15);
-      --text: #E2EAF4;
-      --text-dim: rgba(226,234,244,0.45);
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
-      background: var(--bg);
-      font-family: 'Space Grotesk', sans-serif;
-      color: var(--text);
+      background: #080E1A;
+      font-family: 'Inter', sans-serif;
+      color: #C8D8E8;
       overflow-x: hidden;
     }
 
-    canvas#bg {
+    canvas {
       position: fixed;
       inset: 0;
-      width: 100%; height: 100%;
       z-index: 0;
     }
 
-    .grid-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      background-image:
-        linear-gradient(rgba(245,158,11,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245,158,11,0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-    }
-
-    .glows {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
-      animation: gfloat 20s ease-in-out infinite alternate;
-    }
-
-    .g1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%); top: -80px; left: -80px; animation-duration: 25s; }
-    .g2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(6,182,212,0.25) 0%, transparent 70%); bottom: -60px; right: -60px; animation-duration: 28s; animation-delay: 6s; }
-    .g3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%); top: 50%; left: 50%; animation-duration: 22s; animation-delay: 12s; }
-
-    @keyframes gfloat {
-      0% { transform: translate(0,0) scale(1); }
-      40% { transform: translate(50px, 40px) scale(1.1); }
-      70% { transform: translate(-30px, 60px) scale(0.95); }
-      100% { transform: translate(20px, -40px) scale(1.05); }
-    }
-
-    .back-btn {
+    .back {
       position: fixed;
       top: 20px; left: 20px;
-      z-index: 20;
+      z-index: 10;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 9px 18px;
-      background: rgba(6,17,42,0.8);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--border);
+      gap: 7px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 50px;
-      color: var(--gold);
+      color: rgba(200,216,232,0.6);
       text-decoration: none;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      transition: all 0.3s ease;
+      transition: all .25s;
     }
 
-    .back-btn:hover {
-      background: rgba(245,158,11,0.08);
-      border-color: rgba(245,158,11,0.4);
-      transform: translateX(-3px);
+    .back:hover {
+      background: rgba(245,158,11,0.07);
+      border-color: rgba(245,158,11,0.3);
+      color: #F59E0B;
     }
 
-    .page {
+    .wrap {
       position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      z-index: 1;
       min-height: 100vh;
-      padding: 4rem 1.2rem 3rem;
-      gap: 1.5rem;
-    }
-
-    .pair-header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 0.5rem;
-    }
-
-    .logo-ring {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      background: linear-gradient(var(--bg), var(--bg)) padding-box,
-                  linear-gradient(135deg, var(--gold), var(--cyan), var(--purple)) border-box;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: spin 8s linear infinite;
-      margin-bottom: 0.8rem;
-      position: relative;
+      padding: 5rem 1rem 2rem;
     }
 
-    .logo-ring::before {
-      content: '';
-      position: absolute;
-      inset: -5px;
-      border-radius: 50%;
-      border: 1px solid transparent;
-      background: linear-gradient(var(--bg), var(--bg)) padding-box,
-                  linear-gradient(135deg, var(--purple), var(--gold)) border-box;
-      animation: spin 8s linear infinite reverse;
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 24px;
+      overflow: hidden;
     }
 
-    .logo-ring i {
-      font-size: 1.8rem;
-      background: linear-gradient(135deg, var(--gold), var(--cyan));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      z-index: 1;
+    .card-top {
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .card-icon {
+      width: 60px; height: 60px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.15);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: #F59E0B;
+      margin: 0 auto 1.2rem;
     }
 
-    .pair-title {
+    .card-title {
       font-family: 'Syne', sans-serif;
-      font-size: 2rem;
+      font-size: 1.5rem;
       font-weight: 800;
-      letter-spacing: 5px;
-      background: linear-gradient(135deg, var(--gold) 0%, var(--cyan) 60%, var(--purple2) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+      letter-spacing: 3px;
+      color: #fff;
+      margin-bottom: 0.3rem;
     }
 
-    .pair-brand {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 4px;
+    .card-sub {
+      font-size: 0.75rem;
+      color: rgba(200,216,232,0.35);
+      letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--text-dim);
     }
 
     .steps {
       display: flex;
       align-items: center;
-      gap: 0;
-      width: 100%;
-      max-width: 460px;
+      padding: 1.5rem 2rem;
+      background: rgba(0,0,0,0.2);
     }
 
     .step {
@@ -197,599 +119,352 @@
       gap: 5px;
     }
 
-    .step-num {
-      width: 34px; height: 34px;
+    .snum {
+      width: 30px; height: 30px;
       border-radius: 50%;
-      background: rgba(6,17,42,0.9);
-      border: 2px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      color: var(--text-dim);
-      transition: all 0.5s ease;
+      color: rgba(200,216,232,0.3);
+      transition: all .4s ease;
     }
 
-    .step.active .step-num {
-      border-color: var(--gold);
+    .step.on .snum {
+      border-color: #F59E0B;
       background: rgba(245,158,11,0.1);
-      color: var(--gold);
-      box-shadow: 0 0 16px rgba(245,158,11,0.25);
+      color: #F59E0B;
+      box-shadow: 0 0 12px rgba(245,158,11,0.2);
     }
 
-    .step.done .step-num {
-      border-color: var(--green);
-      background: var(--green);
+    .step.ok .snum {
+      border-color: #22C55E;
+      background: #22C55E;
       color: #fff;
+      font-size: 0.65rem;
     }
 
-    .step-lbl {
-      font-size: 0.58rem;
-      font-weight: 700;
+    .slbl {
+      font-size: 0.55rem;
+      font-weight: 600;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--text-dim);
-      transition: color 0.3s;
-      white-space: nowrap;
+      color: rgba(200,216,232,0.25);
+      transition: color .3s;
     }
 
-    .step.active .step-lbl, .step.done .step-lbl { color: var(--gold); }
+    .step.on .slbl, .step.ok .slbl { color: #F59E0B; }
 
-    .step-line {
+    .sline {
       flex: 1;
       height: 1px;
-      background: rgba(255,255,255,0.07);
-      margin: 0 6px;
-      margin-bottom: 18px;
-      transition: background 0.5s;
-      min-width: 40px;
+      background: rgba(255,255,255,0.06);
+      margin: 0 8px;
+      margin-bottom: 17px;
+      transition: background .5s;
+      min-width: 30px;
     }
 
-    .step-line.active { background: linear-gradient(90deg, var(--gold), var(--cyan)); }
+    .sline.on { background: linear-gradient(90deg, #F59E0B, #5EEAD4); }
 
-    .main-box {
-      width: 100%;
-      max-width: 500px;
-      padding: 2.5rem 2rem;
-      background: var(--card-bg);
-      backdrop-filter: blur(24px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
+    .card-body { padding: 2rem; }
 
-    .main-box::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 3px;
-      background: linear-gradient(90deg, var(--gold), var(--cyan), var(--purple), var(--gold));
-      background-size: 200% 100%;
-      animation: shimmer 4s linear infinite;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 0%; }
-      100% { background-position: 200%; }
-    }
-
-    .input-label {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 0.7rem;
+    .field-label {
+      font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 0.9rem;
-      text-align: left;
+      color: rgba(200,216,232,0.4);
+      margin-bottom: 0.7rem;
     }
 
-    .input-label i { color: var(--gold); }
-
-    .input-wrap {
+    .field {
       display: flex;
-      width: 100%;
-      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 12px;
       overflow: hidden;
-      border: 1px solid rgba(245,158,11,0.18);
       background: rgba(0,0,0,0.25);
-      transition: all 0.3s ease;
+      transition: border-color .25s, box-shadow .25s;
     }
 
-    .input-wrap:focus-within {
-      border-color: rgba(245,158,11,0.5);
-      box-shadow: 0 0 20px rgba(245,158,11,0.08);
+    .field:focus-within {
+      border-color: rgba(245,158,11,0.4);
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.06);
     }
 
-    .input-plus {
+    .field-pre {
+      padding: 0 1rem;
       display: flex;
       align-items: center;
-      padding: 0 1rem;
-      background: rgba(245,158,11,0.07);
-      border-right: 1px solid rgba(245,158,11,0.12);
-      color: var(--gold);
+      background: rgba(245,158,11,0.05);
+      border-right: 1px solid rgba(255,255,255,0.07);
+      color: #F59E0B;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
     }
 
-    .input-wrap input {
+    .field input {
       flex: 1;
-      padding: 1rem 1.2rem;
+      padding: 0.95rem 1rem;
       background: transparent;
       border: none;
       color: #fff;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       outline: none;
     }
 
-    .input-wrap input::placeholder {
-      color: rgba(226,234,244,0.2);
-      font-family: 'Space Grotesk', sans-serif;
+    .field input::placeholder {
+      color: rgba(200,216,232,0.2);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
       letter-spacing: 0.5px;
-      font-size: 0.9rem;
     }
 
-    .gen-btn {
+    .go-btn {
       width: 100%;
       margin-top: 1rem;
-      padding: 1.1rem;
-      background: linear-gradient(135deg, var(--gold), #E07B00);
+      padding: 1rem;
+      background: #F59E0B;
       border: none;
-      border-radius: 14px;
-      color: #0A0A0A;
+      border-radius: 12px;
+      color: #0A0D14;
       font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
       font-weight: 800;
-      font-size: 0.88rem;
-      letter-spacing: 3px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.35s ease;
+      transition: all .3s ease;
       position: relative;
       overflow: hidden;
     }
 
-    .gen-btn::after {
+    .go-btn::before {
       content: '';
       position: absolute;
-      top: -50%; left: -60%;
-      width: 200%; height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
-      transform: rotate(30deg);
-      transition: left 0.6s ease;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: translateX(-100%);
+      transition: transform .5s ease;
     }
 
-    .gen-btn:hover::after { left: 100%; }
+    .go-btn:hover::before { transform: translateX(100%); }
 
-    .gen-btn:hover {
-      background: linear-gradient(135deg, var(--gold2), var(--cyan));
-      transform: translateY(-3px);
-      box-shadow: 0 12px 35px rgba(245,158,11,0.25);
+    .go-btn:hover {
+      background: #FBBF24;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(245,158,11,0.3);
     }
 
-    .gen-btn:active { transform: translateY(-1px) scale(0.98); }
+    .go-btn:active { transform: translateY(0) scale(.98); }
 
-    .gen-btn:disabled {
-      opacity: 0.5;
+    .go-btn:disabled {
+      opacity: .5;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
 
-    #waiting-message {
+    #loader {
       display: none;
       margin-top: 1.2rem;
-      padding: 1rem 1.2rem;
-      background: rgba(6,182,212,0.06);
-      border: 1px solid rgba(6,182,212,0.18);
-      border-radius: 12px;
-      color: var(--text-dim);
-      font-size: 0.88rem;
+      padding: 0.9rem 1.1rem;
+      background: rgba(94,234,212,0.05);
+      border: 1px solid rgba(94,234,212,0.12);
+      border-radius: 10px;
+      font-size: 0.82rem;
+      color: rgba(200,216,232,0.6);
     }
 
-    .wait-inner {
+    .ld-row {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 0.8rem;
     }
 
-    .dots {
-      display: flex;
-      gap: 5px;
-    }
-
     .dots span {
-      width: 6px; height: 6px;
+      display: inline-block;
+      width: 5px; height: 5px;
       border-radius: 50%;
-      background: var(--cyan);
-      animation: bounce 1.4s infinite;
+      background: #5EEAD4;
+      animation: bob 1.4s infinite;
+      margin-right: 3px;
     }
 
-    .dots span:nth-child(2) { animation-delay: 0.2s; }
-    .dots span:nth-child(3) { animation-delay: 0.4s; }
+    .dots span:nth-child(2) { animation-delay: .2s; }
+    .dots span:nth-child(3) { animation-delay: .4s; }
 
-    @keyframes bounce {
-      0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+    @keyframes bob {
+      0%,80%,100% { transform: scale(.6); opacity: .4; }
       40% { transform: scale(1); opacity: 1; }
     }
 
-    .pbar-track {
-      width: 100%;
-      height: 3px;
-      background: rgba(6,182,212,0.1);
-      border-radius: 3px;
-      overflow: hidden;
+    .pbar { height: 2px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+    .pfill {
+      height: 100%; width: 0;
+      background: linear-gradient(90deg, #F59E0B, #5EEAD4);
+      animation: fill 25s ease-out forwards;
     }
 
-    .pbar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--gold), var(--cyan));
-      border-radius: 3px;
-      animation: pFill 25s ease-out forwards;
+    @keyframes fill {
+      0%{width:0%} 30%{width:40%} 60%{width:65%} 80%{width:80%} 100%{width:95%}
     }
 
-    @keyframes pFill {
-      0% { width: 0%; }
-      30% { width: 40%; }
-      60% { width: 65%; }
-      80% { width: 80%; }
-      100% { width: 95%; }
-    }
+    #result { margin-top: 1rem; }
 
-    main#pair { margin-top: 1.2rem; }
-
-    .code-box {
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(245,158,11,0.3);
-      padding: 1.3rem 2rem;
-      border-radius: 16px;
+    .code-card {
+      padding: 1.5rem;
+      background: rgba(245,158,11,0.05);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 14px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      animation: popIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: all .3s;
+      animation: up .4s cubic-bezier(.23,1,.32,1);
+      text-align: center;
     }
 
-    @keyframes popIn {
-      0% { opacity: 0; transform: scale(0.93) translateY(8px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+    @keyframes up {
+      from { opacity:0; transform: translateY(10px); }
+      to { opacity:1; transform: translateY(0); }
     }
 
-    .code-box::before {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(245,158,11,0.08), transparent);
-      transition: left 0.6s ease;
-    }
-
-    .code-box:hover::before { left: 100%; }
-
-    .code-box:hover {
-      border-color: rgba(245,158,11,0.6);
-      transform: scale(1.02);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(245,158,11,0.1);
+    .code-card:hover {
+      border-color: rgba(245,158,11,0.5);
+      background: rgba(245,158,11,0.08);
     }
 
     .code-pre {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      color: var(--text-dim);
-      letter-spacing: 2px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
-      margin-bottom: 0.5rem;
+      color: rgba(200,216,232,0.35);
+      margin-bottom: 0.6rem;
     }
 
     .code-val {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       font-weight: 700;
-      color: var(--gold2);
-      letter-spacing: 6px;
-      text-shadow: 0 0 20px rgba(245,158,11,0.5);
-      animation: codeGlow 2s ease-in-out infinite;
+      color: #F59E0B;
+      letter-spacing: 8px;
+      animation: glow 2.5s ease-in-out infinite;
     }
 
-    @keyframes codeGlow {
-      0%,100% { text-shadow: 0 0 15px rgba(245,158,11,0.5); }
-      50% { text-shadow: 0 0 30px rgba(245,158,11,0.8), 0 0 60px rgba(245,158,11,0.3); }
+    @keyframes glow {
+      0%,100% { text-shadow: 0 0 12px rgba(245,158,11,0.4); }
+      50% { text-shadow: 0 0 24px rgba(245,158,11,0.8), 0 0 48px rgba(245,158,11,0.2); }
     }
 
     .code-hint {
+      margin-top: 0.7rem;
       font-size: 0.65rem;
-      color: var(--text-dim);
-      margin-top: 0.6rem;
-      letter-spacing: 1px;
+      color: rgba(200,216,232,0.3);
+      letter-spacing: 1.5px;
       text-transform: uppercase;
     }
 
-    .copy-badge {
+    .copied {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 12px;
-      background: rgba(245,158,11,0.1);
-      border: 1px solid rgba(245,158,11,0.3);
+      padding: 3px 10px;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.25);
       border-radius: 50px;
-      font-size: 0.65rem;
-      color: var(--gold);
-      letter-spacing: 1.5px;
-      margin-top: 0.7rem;
-      animation: popIn 0.3s ease;
-    }
-
-    .err-text {
-      color: var(--red);
-      font-size: 0.88rem;
-      font-weight: 600;
-    }
-
-    .proc-text {
-      color: var(--cyan);
-      font-size: 0.88rem;
-      font-weight: 600;
-    }
-
-    .mini-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.8rem;
-      width: 100%;
-      max-width: 500px;
-    }
-
-    .mini-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.2rem 0.8rem;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .mini-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--mc, var(--gold)), transparent);
-    }
-
-    .mini-card:hover { transform: translateY(-3px); border-color: rgba(245,158,11,0.3); }
-
-    .mini-icon {
-      font-size: 1.1rem;
-      color: var(--mc, var(--gold));
-      margin-bottom: 0.5rem;
-    }
-
-    .mini-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 0.2rem;
-    }
-
-    .mini-lbl {
       font-size: 0.6rem;
-      color: var(--text-dim);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      font-weight: 600;
+      color: #22C55E;
+      letter-spacing: 1px;
+      animation: up .3s ease;
     }
 
-    .tips-box {
-      width: 100%;
-      max-width: 500px;
-    }
-
-    .tips-head {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      text-align: center;
-      margin-bottom: 0.8rem;
-    }
-
-    .tips-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-    }
-
-    .tip {
-      display: flex;
-      align-items: flex-start;
-      gap: 9px;
+    .err {
+      color: #EF4444;
+      font-size: 0.82rem;
+      font-weight: 500;
       padding: 0.8rem 1rem;
-      background: rgba(6,17,42,0.5);
-      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(239,68,68,0.06);
+      border: 1px solid rgba(239,68,68,0.15);
       border-radius: 10px;
-      transition: all 0.3s ease;
+      animation: up .3s ease;
     }
 
-    .tip:hover { border-color: rgba(245,158,11,0.2); }
-
-    .tip i { color: var(--gold); font-size: 0.7rem; margin-top: 2px; flex-shrink: 0; }
-
-    .tip-text { font-size: 0.73rem; color: var(--text-dim); line-height: 1.4; }
-
-    .sec-strip {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      width: 100%;
-      max-width: 500px;
-      padding: 0.8rem 1rem;
-      background: rgba(6,17,42,0.4);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 12px;
-    }
-
-    .sec-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.68rem;
-      color: var(--text-dim);
-      letter-spacing: 0.5px;
-    }
-
-    .sec-item i { color: var(--green); font-size: 0.62rem; }
-
-    .footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      border-top: 1px solid rgba(245,158,11,0.07);
-      width: 100%;
-      max-width: 500px;
-    }
-
-    .footer a { color: var(--gold); text-decoration: none; }
-    .footer a:hover { color: var(--cyan); }
-
-    @media (max-width: 560px) {
-      .pair-title { font-size: 1.6rem; letter-spacing: 4px; }
-      .main-box { padding: 2rem 1.2rem; }
-      .tips-grid { grid-template-columns: 1fr; }
-      .steps { padding: 0 0.5rem; }
-      .back-btn { top: 12px; left: 12px; padding: 8px 14px; }
-      .code-val { font-size: 1.3rem; letter-spacing: 4px; }
-      .mini-stats { gap: 0.5rem; }
-    }
-
-    @media (max-width: 380px) {
-      .input-wrap { flex-direction: column; }
-      .input-plus { padding: 0.7rem; border-right: none; border-bottom: 1px solid rgba(245,158,11,0.12); justify-content: center; }
+    @media (max-width: 500px) {
+      .card { border-radius: 16px; }
+      .card-top { padding: 2rem 1.5rem 1.5rem; }
+      .card-body { padding: 1.5rem; }
+      .steps { padding: 1.2rem 1.5rem; }
+      .code-val { font-size: 1.4rem; letter-spacing: 5px; }
+      .back { top: 12px; left: 12px; }
     }
   </style>
 </head>
 <body>
-  <canvas id="bg"></canvas>
-  <div class="grid-overlay"></div>
-  <div class="glows">
-    <div class="glow g1"></div>
-    <div class="glow g2"></div>
-    <div class="glow g3"></div>
-  </div>
+  <canvas id="c"></canvas>
+  <a href="/" class="back"><i class="fas fa-arrow-left"></i> Back</a>
 
-  <a href="/" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
+  <div class="wrap">
+    <div class="card">
 
-  <div class="page">
-
-    <div class="pair-header">
-      <div class="logo-ring"><i class="fas fa-link"></i></div>
-      <h1 class="pair-title">PAIR CODE</h1>
-      <p class="pair-brand">NEXUS-MD &nbsp;·&nbsp; WhatsApp Session</p>
-    </div>
-
-    <div class="steps">
-      <div class="step active" id="step1">
-        <div class="step-num">1</div>
-        <span class="step-lbl">Number</span>
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-link"></i></div>
+        <div class="card-title">PAIR CODE</div>
+        <div class="card-sub">NEXUS-MD Session</div>
       </div>
-      <div class="step-line" id="line1"></div>
-      <div class="step" id="step2">
-        <div class="step-num">2</div>
-        <span class="step-lbl">Generate</span>
-      </div>
-      <div class="step-line" id="line2"></div>
-      <div class="step" id="step3">
-        <div class="step-num">3</div>
-        <span class="step-lbl">Pair</span>
-      </div>
-    </div>
 
-    <div class="main-box" id="box">
-      <div id="text">
-        <div class="input-label">
-          <i class="fas fa-phone-alt"></i>
-          <span>WhatsApp Number with Country Code</span>
+      <div class="steps">
+        <div class="step on" id="s1">
+          <div class="snum">1</div>
+          <span class="slbl">Number</span>
         </div>
-        <div class="input-wrap">
-          <div class="input-plus">+</div>
-          <input placeholder="e.g. 254792021944" type="number" id="number">
+        <div class="sline" id="l1"></div>
+        <div class="step" id="s2">
+          <div class="snum">2</div>
+          <span class="slbl">Generate</span>
         </div>
-        <button class="gen-btn" id="submit">
+        <div class="sline" id="l2"></div>
+        <div class="step" id="s3">
+          <div class="snum">3</div>
+          <span class="slbl">Pair</span>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="field-label">WhatsApp number with country code</div>
+        <div class="field">
+          <div class="field-pre">+</div>
+          <input id="num" type="number" placeholder="e.g. 254792021944">
+        </div>
+        <button class="go-btn" id="btn">
           <i class="fas fa-bolt"></i> &nbsp; Generate Pair Code
         </button>
-        <div id="waiting-message">
-          <div class="wait-inner">
+        <div id="loader">
+          <div class="ld-row">
             <div class="dots"><span></span><span></span><span></span></div>
-            <span>Connecting to WhatsApp servers...</span>
+            <span>Connecting to WhatsApp...</span>
           </div>
-          <div class="pbar-track"><div class="pbar-fill" id="progressBar"></div></div>
+          <div class="pbar"><div class="pfill" id="pf"></div></div>
         </div>
-        <main id="pair"></main>
+        <div id="result"></div>
       </div>
-    </div>
 
-    <div class="mini-stats">
-      <div class="mini-card" style="--mc: var(--gold);">
-        <div class="mini-icon"><i class="fas fa-users"></i></div>
-        <div class="mini-num" id="miniTotal">--</div>
-        <div class="mini-lbl">Total Sessions</div>
-      </div>
-      <div class="mini-card" style="--mc: var(--green);">
-        <div class="mini-icon"><i class="fas fa-check-circle"></i></div>
-        <div class="mini-num" id="miniSuccess">--%</div>
-        <div class="mini-lbl">Success Rate</div>
-      </div>
-      <div class="mini-card" style="--mc: var(--cyan);">
-        <div class="mini-icon"><i class="fas fa-signal"></i></div>
-        <div class="mini-num" id="miniOnline">--</div>
-        <div class="mini-lbl">Online Now</div>
-      </div>
     </div>
-
-    <div class="tips-box">
-      <div class="tips-head"><i class="fas fa-lightbulb" style="color:var(--gold);margin-right:6px;"></i> Quick Tips</div>
-      <div class="tips-grid">
-        <div class="tip"><i class="fas fa-check"></i><span class="tip-text">Include full country code without the leading + sign</span></div>
-        <div class="tip"><i class="fas fa-clock"></i><span class="tip-text">Code expires in 60 seconds — enter it promptly in WhatsApp</span></div>
-        <div class="tip"><i class="fas fa-mobile-alt"></i><span class="tip-text">Go to Linked Devices &gt; Link a Device &gt; Link with phone number</span></div>
-        <div class="tip"><i class="fas fa-redo"></i><span class="tip-text">If it fails, wait 10 seconds then try generating a new code</span></div>
-      </div>
-    </div>
-
-    <div class="sec-strip">
-      <div class="sec-item"><i class="fas fa-lock"></i> End-to-End Encrypted</div>
-      <div class="sec-item"><i class="fas fa-eye-slash"></i> No Data Stored</div>
-      <div class="sec-item"><i class="fas fa-shield-alt"></i> Secure Transfer</div>
-    </div>
-
-    <footer class="footer">
-      <a href="/">NEXUS-MD</a> &nbsp;·&nbsp; Powered by Baileys &nbsp;·&nbsp; Secure Session Generator
-    </footer>
   </div>
 
   <script>
-    const canvas = document.getElementById('bg');
-    const ctx = canvas.getContext('2d');
+    const c = document.getElementById('c');
+    const x = c.getContext('2d');
     let W, H, pts = [];
 
-    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    const resize = () => { W = c.width = window.innerWidth; H = c.height = window.innerHeight; };
     resize();
     window.addEventListener('resize', () => { resize(); pts = []; init(); });
 
@@ -797,120 +472,93 @@
       constructor() { this.reset(); }
       reset() {
         this.x = Math.random() * W; this.y = Math.random() * H;
-        this.r = Math.random() * 1.2 + 0.3;
-        this.vx = (Math.random()-.5)*.3; this.vy = (Math.random()-.5)*.3;
-        this.op = Math.random() * 0.35 + 0.05;
-        this.c = [`rgba(245,158,11,`,`rgba(6,182,212,`,`rgba(124,58,237,`][Math.floor(Math.random()*3)];
+        this.r = Math.random() * 1.2 + .3;
+        this.vx = (Math.random() - .5) * .3; this.vy = (Math.random() - .5) * .3;
+        this.a = Math.random() * .3 + .05;
+        this.col = ['rgba(245,158,11,', 'rgba(94,234,212,', 'rgba(167,139,250,'][Math.floor(Math.random() * 3)];
       }
-      tick() { this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset(); }
-      draw() { ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fillStyle=this.c+this.op+')'; ctx.fill(); }
+      move() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset(); }
+      draw() { x.beginPath(); x.arc(this.x, this.y, this.r, 0, Math.PI * 2); x.fillStyle = this.col + this.a + ')'; x.fill(); }
     }
 
-    function init() { for(let i=0;i<80;i++) pts.push(new P()); }
+    const init = () => { for (let i = 0; i < 80; i++) pts.push(new P()); };
     init();
 
-    function frame() {
-      ctx.clearRect(0,0,W,H);
-      pts.forEach(p=>{p.tick();p.draw();});
-      for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
-        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, d=Math.sqrt(dx*dx+dy*dy);
-        if(d<100){ ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
-          ctx.strokeStyle=`rgba(245,158,11,${0.06*(1-d/100)})`; ctx.lineWidth=0.5; ctx.stroke(); }
+    const frame = () => {
+      x.clearRect(0, 0, W, H);
+      pts.forEach(p => { p.move(); p.draw(); });
+      for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.sqrt(dx*dx+dy*dy);
+        if (d < 100) { x.beginPath(); x.moveTo(pts[i].x, pts[i].y); x.lineTo(pts[j].x, pts[j].y); x.strokeStyle=`rgba(245,158,11,${.05*(1-d/100)})`; x.lineWidth=.5; x.stroke(); }
       }
       requestAnimationFrame(frame);
-    }
+    };
     frame();
 
-    function setStep(n) {
+    const setStep = n => {
       [1,2,3].forEach(i => {
-        const s = document.getElementById('step'+i);
-        s.classList.remove('active','done');
-        if(i < n) s.classList.add('done');
-        else if(i === n) s.classList.add('active');
+        const el = document.getElementById('s'+i);
+        el.classList.remove('on','ok');
+        if (i < n) el.classList.add('ok'), el.querySelector('.snum').innerHTML = '<i class="fas fa-check" style="font-size:.55rem"></i>';
+        else if (i === n) el.classList.add('on');
       });
       [1,2].forEach(i => {
-        const l = document.getElementById('line'+i);
-        if(i < n) l.classList.add('active');
-        else l.classList.remove('active');
+        const el = document.getElementById('l'+i);
+        i < n ? el.classList.add('on') : el.classList.remove('on');
       });
-    }
+    };
 
-    const b = document.getElementById('submit');
-    const waitingMessage = document.getElementById('waiting-message');
+    const btn = document.getElementById('btn');
+    const loader = document.getElementById('loader');
+    const result = document.getElementById('result');
 
-    b.addEventListener('click', async () => {
-      const num = document.getElementById('number').value.trim();
-      if (!num) { alert('Please enter a phone number'); return; }
+    btn.addEventListener('click', async () => {
+      const num = document.getElementById('num').value.trim();
+      if (!num) return;
 
-      b.disabled = true;
-      b.innerHTML = '<i class="fas fa-spinner fa-spin"></i> &nbsp; Connecting...';
-      waitingMessage.style.display = 'block';
-      document.getElementById('pair').innerHTML = '';
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> &nbsp; Connecting...';
+      loader.style.display = 'block';
+      result.innerHTML = '';
 
-      const newBar = document.createElement('div');
-      newBar.className = 'pbar-fill';
-      const track = document.querySelector('.pbar-track');
-      track.innerHTML = ''; track.appendChild(newBar);
+      const pf = document.getElementById('pf');
+      pf.style.animation = 'none'; pf.offsetHeight;
+      pf.style.animation = '';
 
       setStep(2);
 
       try {
-        const res = await fetch('/code?number=' + encodeURIComponent(num));
-        const data = await res.json();
-        waitingMessage.style.display = 'none';
+        const data = await (await fetch('/code?number=' + encodeURIComponent(num))).json();
+        loader.style.display = 'none';
 
         if (data.code) {
           setStep(3);
-          document.getElementById('pair').innerHTML = `
-            <div class="code-box" onclick="copyCode('${data.code}')">
-              <div class="code-pre">Your Pair Code</div>
+          result.innerHTML = `
+            <div class="code-card" onclick="copy('${data.code}')">
+              <div class="code-pre">Your Pairing Code</div>
               <div class="code-val">${data.code}</div>
-              <div class="code-hint"><i class="fas fa-copy"></i> &nbsp; Tap to copy</div>
+              <div class="code-hint" id="hint"><i class="fas fa-copy"></i> &nbsp; Tap to copy</div>
             </div>`;
         } else {
           setStep(1);
-          document.getElementById('pair').innerHTML = `<p class="err-text"><i class="fas fa-exclamation-triangle"></i> &nbsp; ${data.code || 'Service unavailable — try again'}</p>`;
+          result.innerHTML = `<div class="err"><i class="fas fa-exclamation-circle"></i> &nbsp; ${data.code || 'Service unavailable — please try again'}</div>`;
         }
-      } catch(e) {
+      } catch (_) {
         setStep(1);
-        waitingMessage.style.display = 'none';
-        document.getElementById('pair').innerHTML = `<p class="err-text"><i class="fas fa-exclamation-triangle"></i> &nbsp; Connection error — please retry</p>`;
+        loader.style.display = 'none';
+        result.innerHTML = `<div class="err"><i class="fas fa-exclamation-circle"></i> &nbsp; Connection error — please retry</div>`;
       } finally {
-        b.disabled = false;
-        b.innerHTML = '<i class="fas fa-bolt"></i> &nbsp; Generate Pair Code';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-bolt"></i> &nbsp; Generate Pair Code';
       }
     });
 
-    function copyCode(code) {
+    const copy = code => {
       navigator.clipboard.writeText(code).then(() => {
-        const el = document.querySelector('.code-hint');
-        if (el) { el.innerHTML = '<span class="copy-badge"><i class="fas fa-check"></i> Copied!</span>'; }
+        const h = document.getElementById('hint');
+        if (h) h.innerHTML = '<span class="copied"><i class="fas fa-check"></i> Copied!</span>';
       });
-    }
-
-    function animNum(el, end, dur, suf) {
-      suf = suf||'';
-      const s = performance.now();
-      function step(now) {
-        const t = Math.min((now-s)/dur, 1);
-        const e = 1-Math.pow(1-t,3);
-        el.textContent = Math.floor(e*end).toLocaleString()+suf;
-        if(t<1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    }
-
-    async function fetchMini() {
-      try {
-        const d = await (await fetch('/api/stats')).json();
-        animNum(document.getElementById('miniTotal'), d.totalPairings, 1500);
-        animNum(document.getElementById('miniSuccess'), parseFloat(d.successRate), 1200, '%');
-        animNum(document.getElementById('miniOnline'), d.activeUsers, 1000);
-      } catch(e) {}
-    }
-
-    fetchMini();
-    setInterval(fetchMini, 30000);
+    };
   </script>
 </body>
 </html>
