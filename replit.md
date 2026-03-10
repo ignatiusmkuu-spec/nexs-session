@@ -1,7 +1,7 @@
-# JUNE-X Session Generator
+# NEXUS-MD Session Generator
 
 ## Overview
-JUNE-X is a WhatsApp session pairing web application that allows users to generate session credentials via pair code or QR scan. The app features a modern cyberpunk-themed UI with live statistics dashboard.
+NEXUS-MD is a WhatsApp session pairing web application that allows users to generate session credentials via pair code or QR scan. The app features a premium dark UI with gold/cyan gradients, animated particle background, and live statistics dashboard.
 
 ## Project Architecture
 - **voltah.js** - Main Express server with stats API, routes, and middleware
@@ -38,14 +38,18 @@ JUNE-X is a WhatsApp session pairing web application that allows users to genera
 - Node.js 20+ / Express
 - Baileys (WhatsApp Web API)
 - Vanilla HTML/CSS/JS frontend
-- Font Awesome icons, Google Fonts (Orbitron, Exo 2, JetBrains Mono)
+- Font Awesome icons, Google Fonts (Space Grotesk, Syne, JetBrains Mono)
 
 ## Running
 - Default port: 5000 (configurable via PORT env var)
 - Start command: `node voltah.js`
 
+## Session Prefix
+- Sessions are prefixed with `NEXUS-MD:~` (base64 encoded credentials)
+- Pair code custom key: `NEXUSBOT`
+
 ## Recent Changes
-- 2026-02-14: Advanced pair.html with particle canvas, step progress, progress bar, tips, security strip
-- 2026-02-14: Replaced GitHub Fork with Daki.cc in deploy platforms
-- 2026-02-14: Removed GitHub Authorization section
-- 2026-02-14: Complete UI redesign with cyberpunk theme, particle effects, 8 stat cards
+- 2026-03-10: Rebranded from JUNE-X to NEXUS-MD throughout all files
+- 2026-03-10: Complete premium UI redesign — gold/cyan/purple palette, Space Grotesk + Syne fonts, glassmorphism cards, grid overlay background
+- 2026-03-10: Updated session string prefix from JUNE-MD to NEXUS-MD in qr.js and pair.js
+- 2026-03-10: Updated pairing custom code from JUNEXBOT to NEXUSBOT

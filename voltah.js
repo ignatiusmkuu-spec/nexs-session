@@ -114,7 +114,7 @@ app.use('/', async (req, res, next) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`JUNE-X Session Server running on http://0.0.0.0:${PORT}`);
+    console.log(`NEXUS-MD Session Server running on http://0.0.0.0:${PORT}`);
 });
 
 module.exports = app;
