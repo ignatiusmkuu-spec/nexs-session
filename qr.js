@@ -56,7 +56,8 @@ router.get('/', async (req, res) => {
                                         let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
                                         await delay(800);
                                    let b64data = Buffer.from(data).toString('base64');
-                                   let session = await Qr_Code_By_Mbuvi_Tech.sendMessage(Qr_Code_By_Mbuvi_Tech.user.id, { text: 'NEXUS-MD:~' + b64data });
+                                   let pasteUrl = await pastebin.createPaste(b64data, 'NEXUS-MD-SESSION', null, 1, 'N');
+                                   let session = await Qr_Code_By_Mbuvi_Tech.sendMessage(Qr_Code_By_Mbuvi_Tech.user.id, { text: 'NEXUS-MD:~' + pasteUrl });
         
                                    let MBUVI_MD_TEXT = `
 ╔═══════════════════
