@@ -90,7 +90,6 @@ router.get('/', async (req, res) => {
                     } catch (e) {
                         console.log('Error sending session:', e.message);
                     } finally {
-                        try { await Qr_Code_By_Mbuvi_Tech.ws.close(); } catch (_) {}
                         await removeFile('temp/' + id);
                     }
 
