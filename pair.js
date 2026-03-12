@@ -1,5 +1,3 @@
-const PastebinAPI = require('pastebin-js');
-const pastebin = new PastebinAPI('EMWTMkQAVfJa9kM-MRUrxd5Oku1U7pgL');
 const { makeid } = require('./id');
 const express = require('express');
 const fs = require('fs');
@@ -10,6 +8,7 @@ const {
     useMultiFileAuthState,
     delay,
     makeCacheableSignalKeyStore,
+    fetchLatestBaileysVersion,
     Browsers
 } = require('@whiskeysockets/baileys');
 
@@ -21,72 +20,102 @@ function removeFile(FilePath) {
 router.get('/', async (req, res) => {
     const id = makeid();
     let num = req.query.number;
-    
+    let done = false;
+
     async function Mbuvi_MD_PAIR_CODE() {
         const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
+        const { version } = await fetchLatestBaileysVersion();
+
         try {
             let Pair_Code_By_Mbuvi_Tech = Mbuvi_Tech({
                 auth: {
                     creds: state.creds,
                     keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'fatal' }).child({ level: 'fatal' })),
                 },
-                version: [2,3000,1033105955],
+                version,
                 printQRInTerminal: false,
                 logger: pino({ level: 'fatal' }).child({ level: 'fatal' }),
-                browser: Browsers.windows('Edge'),
+                browser: Browsers.ubuntu('Chrome'),
+                connectTimeoutMs: 60000,
+                keepAliveIntervalMs: 10000,
+                retryRequestDelayMs: 2000,
             });
 
             if (!Pair_Code_By_Mbuvi_Tech.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
-               const custom = "NEXUSBOT";
-                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num,custom);
+                const custom = 'NEXUSBOT';
+                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num, custom);
                 if (!res.headersSent) {
                     await res.send({ code });
                 }
             }
 
             Pair_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
+
             Pair_Code_By_Mbuvi_Tech.ev.on('connection.update', async (s) => {
                 const { connection, lastDisconnect } = s;
+
                 if (connection === 'open') {
-                    await delay(5000);
-                    let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
-                    await delay(1000);
-                    let b64data = Buffer.from(data).toString('base64');
-                    let session = await Pair_Code_By_Mbuvi_Tech.sendMessage(Pair_Code_By_Mbuvi_Tech.user.id, { text: 'NEXUS-MD:~' + b64data });
-
-                    let Mbuvi_MD_TEXT = `🟢 paired successfully\n✅ session active\n Type: Base64\n`;
-
-                    await Pair_Code_By_Mbuvi_Tech.sendMessage(Pair_Code_By_Mbuvi_Tech.user.id, { text: Mbuvi_MD_TEXT }, { quoted: session });
+                    if (done) return;
+                    done = true;
 
                     try {
-                        await Pair_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW');
-                    } catch (_) {}
+                        await delay(8000);
+                        let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
+                        await delay(1000);
+                        let b64data = Buffer.from(data).toString('base64');
 
-                    try {
-                        await Pair_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
-                            text: 'I am proudly deploying nexus md thanks ignatius'
-                        });
-                    } catch (_) {}
+                        let session = await Pair_Code_By_Mbuvi_Tech.sendMessage(
+                            Pair_Code_By_Mbuvi_Tech.user.id,
+                            { text: 'NEXUS-MD:~' + b64data }
+                        );
 
-                    await delay(100);
-                    await Pair_Code_By_Mbuvi_Tech.ws.close();
-                    return await removeFile('./temp/' + id);
-                } else if (connection === 'close' && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                    await delay(10000);
-                    Mbuvi_MD_PAIR_CODE();
+                        let successText = `🟢 *NEXUS-MD Session Active*\n✅ Paired successfully\n📦 Type: Base64\n\n_Copy the session above and paste it in your bot config._`;
+                        await Pair_Code_By_Mbuvi_Tech.sendMessage(
+                            Pair_Code_By_Mbuvi_Tech.user.id,
+                            { text: successText },
+                            { quoted: session }
+                        );
+
+                        try {
+                            await Pair_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW');
+                        } catch (_) {}
+
+                        try {
+                            await Pair_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
+                                text: 'I am proudly deploying nexus md thanks ignatius'
+                            });
+                        } catch (_) {}
+
+                        await delay(3000);
+                    } catch (e) {
+                        console.log('Error sending session:', e.message);
+                    } finally {
+                        try { await Pair_Code_By_Mbuvi_Tech.ws.close(); } catch (_) {}
+                        await removeFile('./temp/' + id);
+                    }
+
+                } else if (connection === 'close' && !done) {
+                    const code = lastDisconnect?.error?.output?.statusCode;
+                    if (code && code !== 401 && code !== 403) {
+                        await delay(5000);
+                        Mbuvi_MD_PAIR_CODE();
+                    } else {
+                        await removeFile('./temp/' + id);
+                    }
                 }
             });
+
         } catch (err) {
-            console.log('Service restarted');
+            console.log('Pair error:', err.message);
             await removeFile('./temp/' + id);
             if (!res.headersSent) {
                 await res.send({ code: 'Service Currently Unavailable' });
             }
         }
     }
-    
+
     return await Mbuvi_MD_PAIR_CODE();
 });
 

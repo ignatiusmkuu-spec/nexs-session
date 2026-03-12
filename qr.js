@@ -1,100 +1,120 @@
-const PastebinAPI = require('pastebin-js'),
-pastebin = new PastebinAPI('EMWTMkQAVfJa9kM-MRUrxd5Oku1U7pgL')
-const {makeid} = require('./id');
+const { makeid } = require('./id');
 const QRCode = require('qrcode');
 const express = require('express');
-const path = require('path');
 const fs = require('fs');
-let router = express.Router()
-const pino = require("pino");
+let router = express.Router();
+const pino = require('pino');
 const {
-        default: Mbuvi_Tech,
-        useMultiFileAuthState,
-        jidNormalizedUser,
-        Browsers,
-        delay,
-        makeInMemoryStore,
-} = require("@whiskeysockets/baileys");
+    default: Mbuvi_Tech,
+    useMultiFileAuthState,
+    fetchLatestBaileysVersion,
+    Browsers,
+    delay,
+} = require('@whiskeysockets/baileys');
 
 function removeFile(FilePath) {
-        if (!fs.existsSync(FilePath)) return false;
-        fs.rmSync(FilePath, {
-                recursive: true,
-                force: true
-        })
-};
-const {
-        readFile
-} = require("node:fs/promises")
+    if (!fs.existsSync(FilePath)) return false;
+    fs.rmSync(FilePath, { recursive: true, force: true });
+}
+
 router.get('/', async (req, res) => {
-        const id = makeid();
-        async function MBUVI_MD_QR_CODE() {
-                const {
-                        state,
-                        saveCreds
-                } = await useMultiFileAuthState('./temp/' + id)
-                try {
-                        let Qr_Code_By_Mbuvi_Tech = Mbuvi_Tech({
-                                auth: state,
-                                printQRInTerminal: false,
-                                logger: pino({
-                                        level: "silent"
-                                }),
-                                browser: Browsers.macOS("Desktop"),
-                        });
+    const id = makeid();
+    let done = false;
 
-                        Qr_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds)
-                        Qr_Code_By_Mbuvi_Tech.ev.on("connection.update", async (s) => {
-                                const {
-                                        connection,
-                                        lastDisconnect,
-                                        qr
-                                } = s;
-                                if (qr) await res.end(await QRCode.toBuffer(qr));
-                                if (connection == "open") {
-                                        await delay(5000);
-                                        let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
-                                        await delay(800);
-                                   let b64data = Buffer.from(data).toString('base64');
-                                   let session = await Qr_Code_By_Mbuvi_Tech.sendMessage(Qr_Code_By_Mbuvi_Tech.user.id, { text: 'NEXUS-MD:~' + b64data });
-        
-                                   let MBUVI_MD_TEXT = `
-╔═══════════════════
-║『 SESSION CONNECTED』
-║ 🟢  Nexus MD
-║ 🟢  supreme
-║ 🟢  base64
-╚═══════════════════`;
-         await Qr_Code_By_Mbuvi_Tech.sendMessage(Qr_Code_By_Mbuvi_Tech.user.id,{text:MBUVI_MD_TEXT},{quoted:session})
+    async function MBUVI_MD_QR_CODE() {
+        const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
+        const { version } = await fetchLatestBaileysVersion();
 
-                                        try {
-                                                await Qr_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW');
-                                        } catch (_) {}
+        try {
+            let Qr_Code_By_Mbuvi_Tech = Mbuvi_Tech({
+                auth: state,
+                version,
+                printQRInTerminal: false,
+                logger: pino({ level: 'silent' }),
+                browser: Browsers.macOS('Desktop'),
+                connectTimeoutMs: 60000,
+                keepAliveIntervalMs: 10000,
+                retryRequestDelayMs: 2000,
+            });
 
-                                        try {
-                                                await Qr_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
-                                                        text: 'I am proudly deploying nexus md thanks ignatius'
-                                                });
-                                        } catch (_) {}
+            Qr_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
 
-                                        await delay(100);
-                                        await Qr_Code_By_Mbuvi_Tech.ws.close();
-                                        return await removeFile("temp/" + id);
-                                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                                        await delay(10000);
-                                        MBUVI_MD_QR_CODE();
-                                }
-                        });
-                } catch (err) {
-                        if (!res.headersSent) {
-                                await res.json({
-                                        code: "Service is Currently Unavailable"
-                                });
-                        }
-                        console.log(err);
-                        await removeFile("temp/" + id);
+            Qr_Code_By_Mbuvi_Tech.ev.on('connection.update', async (s) => {
+                const { connection, lastDisconnect, qr } = s;
+
+                if (qr) {
+                    try {
+                        if (!res.headersSent) await res.end(await QRCode.toBuffer(qr));
+                    } catch (_) {}
                 }
+
+                if (connection === 'open') {
+                    if (done) return;
+                    done = true;
+
+                    try {
+                        await delay(8000);
+                        let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
+                        await delay(1000);
+                        let b64data = Buffer.from(data).toString('base64');
+
+                        let session = await Qr_Code_By_Mbuvi_Tech.sendMessage(
+                            Qr_Code_By_Mbuvi_Tech.user.id,
+                            { text: 'NEXUS-MD:~' + b64data }
+                        );
+
+                        let successText = `
+╔═══════════════════
+║『 SESSION CONNECTED 』
+║ 🟢  NEXUS-MD
+║ ✅  Paired Successfully
+║ 📦  Type: Base64
+╚═══════════════════`;
+                        await Qr_Code_By_Mbuvi_Tech.sendMessage(
+                            Qr_Code_By_Mbuvi_Tech.user.id,
+                            { text: successText },
+                            { quoted: session }
+                        );
+
+                        try {
+                            await Qr_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW');
+                        } catch (_) {}
+
+                        try {
+                            await Qr_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
+                                text: 'I am proudly deploying nexus md thanks ignatius'
+                            });
+                        } catch (_) {}
+
+                        await delay(3000);
+                    } catch (e) {
+                        console.log('Error sending session:', e.message);
+                    } finally {
+                        try { await Qr_Code_By_Mbuvi_Tech.ws.close(); } catch (_) {}
+                        await removeFile('temp/' + id);
+                    }
+
+                } else if (connection === 'close' && !done) {
+                    const code = lastDisconnect?.error?.output?.statusCode;
+                    if (code && code !== 401 && code !== 403) {
+                        await delay(5000);
+                        MBUVI_MD_QR_CODE();
+                    } else {
+                        await removeFile('temp/' + id);
+                    }
+                }
+            });
+
+        } catch (err) {
+            if (!res.headersSent) {
+                await res.json({ code: 'Service is Currently Unavailable' });
+            }
+            console.log('QR error:', err.message);
+            await removeFile('temp/' + id);
         }
-        return await MBUVI_MD_QR_CODE()
+    }
+
+    return await MBUVI_MD_QR_CODE();
 });
-module.exports = router
+
+module.exports = router;
