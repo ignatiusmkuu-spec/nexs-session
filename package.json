@@ -12,7 +12,7 @@
   "author": "Giddy Tennor",
   "license": "GPL-3.0 license",
   "dependencies": {
-    "@whiskeysockets/baileys": "npm:wileys",
+    "@whiskeysockets/baileys": "npm install @whiskeysockets/baileys",
     "awesome-phonenumber": "^2.73.0",
     "baileys-elite": "^0.0.9",
     "baileys-pro": "^0.0.5",
