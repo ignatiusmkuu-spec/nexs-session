@@ -10,7 +10,6 @@ import {
     useMultiFileAuthState,
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
-    Browsers,
     delay,
 } from '@whiskeysockets/baileys';
 
@@ -52,7 +51,7 @@ router.get('/', async (req, res) => {
                 version,
                 printQRInTerminal: false,
                 logger,
-                browser: Browsers.macOS('Desktop'),
+                browser: ['NEXUS-MD', 'Chrome', '3.0.0'],
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 10000,
                 retryRequestDelayMs: 2000,

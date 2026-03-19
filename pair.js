@@ -10,7 +10,6 @@ import {
     delay,
     makeCacheableSignalKeyStore,
     fetchLatestBaileysVersion,
-    Browsers
 } from '@whiskeysockets/baileys';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -56,7 +55,7 @@ router.get('/', async (req, res) => {
                 version,
                 printQRInTerminal: false,
                 logger,
-                browser: Browsers.ubuntu('Chrome'),
+                browser: ['NEXUS-MD', 'Chrome', '3.0.0'],
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 10000,
                 retryRequestDelayMs: 2000,
