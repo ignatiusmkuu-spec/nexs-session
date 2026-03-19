@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import pino from 'pino';
 import {
-    default as Mbuvi_Tech,
+    default as makeWASocket,
     useMultiFileAuthState,
     delay,
     makeCacheableSignalKeyStore,
@@ -15,36 +15,50 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const TEMP_DIR = path.join(__dirname, 'temp');
+const FALLBACK_VERSION = [2, 3000, 1023953629];
+
 const router = express.Router();
 
-function removeFile(FilePath) {
-    if (!fs.existsSync(FilePath)) return false;
-    fs.rmSync(FilePath, { recursive: true, force: true });
+function removeFile(filePath) {
+    try {
+        if (fs.existsSync(filePath)) fs.rmSync(filePath, { recursive: true, force: true });
+    } catch (_) {}
 }
 
 router.get('/', async (req, res) => {
     const id = makeid();
+    const sessionPath = path.join(TEMP_DIR, id);
     let num = req.query.number;
     let done = false;
 
     async function Mbuvi_MD_PAIR_CODE() {
-        if (!fs.existsSync('./temp')) fs.mkdirSync('./temp', { recursive: true });
-        const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
-        const { version } = await fetchLatestBaileysVersion();
+        if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
+
+        const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+
+        let version = FALLBACK_VERSION;
+        try {
+            const v = await fetchLatestBaileysVersion();
+            if (v?.version) version = v.version;
+        } catch (_) {}
+
+        const logger = pino({ level: 'fatal' }).child({ level: 'fatal' });
 
         try {
-            let Pair_Code_By_Mbuvi_Tech = Mbuvi_Tech({
+            let Pair_Code_By_Mbuvi_Tech = makeWASocket({
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'fatal' }).child({ level: 'fatal' })),
+                    keys: makeCacheableSignalKeyStore(state.keys, logger),
                 },
                 version,
                 printQRInTerminal: false,
-                logger: pino({ level: 'fatal' }).child({ level: 'fatal' }),
+                logger,
                 browser: ['NEXUS-MD', 'Firefox', '3.0.0'],
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 10000,
                 retryRequestDelayMs: 2000,
+                syncFullHistory: false,
             });
 
             Pair_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
@@ -52,7 +66,7 @@ router.get('/', async (req, res) => {
             if (!Pair_Code_By_Mbuvi_Tech.authState.creds.registered) {
                 await delay(3000);
                 num = num.replace(/[^0-9]/g, '');
-                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num, 'NEXUSBOT');
+                await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num, 'NEXUSBOT');
                 if (!res.headersSent) {
                     await res.send({ code: 'NEXUS-BOT' });
                 }
@@ -67,26 +81,22 @@ router.get('/', async (req, res) => {
 
                     try {
                         await delay(8000);
-                        let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
+                        const credsData = fs.readFileSync(path.join(sessionPath, 'creds.json'));
                         await delay(1000);
-                        let b64data = Buffer.from(data).toString('base64');
+                        const b64data = Buffer.from(credsData).toString('base64');
 
-                        let session = await Pair_Code_By_Mbuvi_Tech.sendMessage(
+                        const session = await Pair_Code_By_Mbuvi_Tech.sendMessage(
                             Pair_Code_By_Mbuvi_Tech.user.id,
                             { text: 'NEXUS-MD:~' + b64data }
                         );
 
-                        let successText = `🟢 *NEXUS-MD Session Active*\n✅ Paired successfully\n📦 Type: Base64\n\n_Copy the session above and paste it in your bot config._`;
                         await Pair_Code_By_Mbuvi_Tech.sendMessage(
                             Pair_Code_By_Mbuvi_Tech.user.id,
-                            { text: successText },
+                            { text: `🟢 *NEXUS-MD Session Active*\n✅ Paired successfully\n📦 Type: Base64\n\n_Copy the session above and paste it in your bot config._` },
                             { quoted: session }
                         );
 
-                        try {
-                            await Pair_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW');
-                        } catch (_) {}
-
+                        try { await Pair_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW'); } catch (_) {}
                         try {
                             await Pair_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
                                 text: 'I am proudly deploying nexus md thanks ignatius'
@@ -97,7 +107,7 @@ router.get('/', async (req, res) => {
                     } catch (e) {
                         console.log('Error sending session:', e.message);
                     } finally {
-                        await removeFile('./temp/' + id);
+                        removeFile(sessionPath);
                     }
 
                 } else if (connection === 'close' && !done) {
@@ -106,16 +116,16 @@ router.get('/', async (req, res) => {
                         await delay(5000);
                         Mbuvi_MD_PAIR_CODE();
                     } else {
-                        await removeFile('./temp/' + id);
+                        removeFile(sessionPath);
                     }
                 }
             });
 
         } catch (err) {
             console.log('Pair error:', err.message);
-            await removeFile('./temp/' + id);
+            removeFile(sessionPath);
             if (!res.headersSent) {
-                await res.send({ code: 'Service Currently Unavailable' });
+                res.send({ code: 'Service Currently Unavailable' });
             }
         }
     }
