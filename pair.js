@@ -10,7 +10,6 @@ import {
     delay,
     makeCacheableSignalKeyStore,
     fetchLatestBaileysVersion,
-    Browsers,
 } from '@whiskeysockets/baileys';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -42,7 +41,7 @@ router.get('/', async (req, res) => {
                 version,
                 printQRInTerminal: false,
                 logger: pino({ level: 'fatal' }).child({ level: 'fatal' }),
-                browser: Browsers.ubuntu('Chrome'),
+                browser: ['NEXUS-MD', 'Chrome', '3.0.0'],
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 10000,
                 retryRequestDelayMs: 2000,
@@ -51,12 +50,12 @@ router.get('/', async (req, res) => {
             Pair_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
 
             if (!Pair_Code_By_Mbuvi_Tech.authState.creds.registered) {
-                await delay(1500);
+                await delay(3000);
                 num = num.replace(/[^0-9]/g, '');
-                const custom = 'NEXUSBOT';
-                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num, custom);
+                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num);
+                const formatted = code?.match(/.{1,4}/g)?.join('-') || code;
                 if (!res.headersSent) {
-                    await res.send({ code });
+                    await res.send({ code: formatted });
                 }
             }
 
