@@ -12,6 +12,8 @@ const {
     Browsers
 } = require('@whiskeysockets/baileys');
 
+const FALLBACK_WA_VERSION = [2, 3000, 1015901307];
+
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
     fs.rmSync(FilePath, { recursive: true, force: true });
@@ -22,19 +24,32 @@ router.get('/', async (req, res) => {
     let num = req.query.number;
     let done = false;
 
+    if (!num) {
+        return res.status(400).json({ code: 'Phone number is required' });
+    }
+
     async function Mbuvi_MD_PAIR_CODE() {
+        if (!fs.existsSync('./temp')) fs.mkdirSync('./temp', { recursive: true });
+
         const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
-        const { version } = await fetchLatestBaileysVersion();
+
+        let version = FALLBACK_WA_VERSION;
+        try {
+            const result = await fetchLatestBaileysVersion();
+            if (result && result.version) version = result.version;
+        } catch (_) {}
+
+        const logger = pino({ level: 'fatal' }).child({ level: 'fatal' });
 
         try {
             let Pair_Code_By_Mbuvi_Tech = Mbuvi_Tech({
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'fatal' }).child({ level: 'fatal' })),
+                    keys: makeCacheableSignalKeyStore(state.keys, logger),
                 },
                 version,
                 printQRInTerminal: false,
-                logger: pino({ level: 'fatal' }).child({ level: 'fatal' }),
+                logger,
                 browser: Browsers.ubuntu('Chrome'),
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 10000,
@@ -44,10 +59,9 @@ router.get('/', async (req, res) => {
             if (!Pair_Code_By_Mbuvi_Tech.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
-                const custom = 'NEXUSBOT';
-                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num, custom);
+                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num);
                 if (!res.headersSent) {
-                    await res.send({ code });
+                    await res.json({ code });
                 }
             }
 
@@ -110,7 +124,7 @@ router.get('/', async (req, res) => {
             console.log('Pair error:', err.message);
             await removeFile('./temp/' + id);
             if (!res.headersSent) {
-                await res.send({ code: 'Service Currently Unavailable' });
+                res.status(500).json({ code: 'Service Currently Unavailable' });
             }
         }
     }

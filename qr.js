@@ -8,9 +8,12 @@ const {
     default: Mbuvi_Tech,
     useMultiFileAuthState,
     fetchLatestBaileysVersion,
+    makeCacheableSignalKeyStore,
     Browsers,
     delay,
 } = require('@whiskeysockets/baileys');
+
+const FALLBACK_WA_VERSION = [2, 3000, 1015901307];
 
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
@@ -22,15 +25,27 @@ router.get('/', async (req, res) => {
     let done = false;
 
     async function MBUVI_MD_QR_CODE() {
+        if (!fs.existsSync('./temp')) fs.mkdirSync('./temp', { recursive: true });
+
         const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
-        const { version } = await fetchLatestBaileysVersion();
+
+        let version = FALLBACK_WA_VERSION;
+        try {
+            const result = await fetchLatestBaileysVersion();
+            if (result && result.version) version = result.version;
+        } catch (_) {}
+
+        const logger = pino({ level: 'fatal' }).child({ level: 'fatal' });
 
         try {
             let Qr_Code_By_Mbuvi_Tech = Mbuvi_Tech({
-                auth: state,
+                auth: {
+                    creds: state.creds,
+                    keys: makeCacheableSignalKeyStore(state.keys, logger),
+                },
                 version,
                 printQRInTerminal: false,
-                logger: pino({ level: 'silent' }),
+                logger,
                 browser: Browsers.macOS('Desktop'),
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 10000,
@@ -90,7 +105,7 @@ router.get('/', async (req, res) => {
                     } catch (e) {
                         console.log('Error sending session:', e.message);
                     } finally {
-                        await removeFile('temp/' + id);
+                        await removeFile('./temp/' + id);
                     }
 
                 } else if (connection === 'close' && !done) {
@@ -99,17 +114,17 @@ router.get('/', async (req, res) => {
                         await delay(5000);
                         MBUVI_MD_QR_CODE();
                     } else {
-                        await removeFile('temp/' + id);
+                        await removeFile('./temp/' + id);
                     }
                 }
             });
 
         } catch (err) {
-            if (!res.headersSent) {
-                await res.json({ code: 'Service is Currently Unavailable' });
-            }
             console.log('QR error:', err.message);
-            await removeFile('temp/' + id);
+            await removeFile('./temp/' + id);
+            if (!res.headersSent) {
+                res.status(500).json({ code: 'Service is Currently Unavailable' });
+            }
         }
     }
 
