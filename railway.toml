@@ -1,0 +1,8 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm install --legacy-peer-deps"
+
+[deploy]
+startCommand = "node voltah.js"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
