@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
                 version,
                 printQRInTerminal: false,
                 logger: pino({ level: 'silent' }),
-                browser: ['NEXUS-MD', 'Chrome', '3.0.0'],
+                browser: ['NEXUS-MD', 'Firefox', '3.0.0'],
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 10000,
                 retryRequestDelayMs: 2000,
