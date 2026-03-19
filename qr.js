@@ -1,16 +1,22 @@
-const { makeid } = require('./id');
-const QRCode = require('qrcode');
-const express = require('express');
-const fs = require('fs');
-let router = express.Router();
-const pino = require('pino');
-const {
-    default: Mbuvi_Tech,
+import { makeid } from './id.js';
+import QRCode from 'qrcode';
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import pino from 'pino';
+import {
+    default as Mbuvi_Tech,
     useMultiFileAuthState,
     fetchLatestBaileysVersion,
     Browsers,
     delay,
-} = require('@whiskeysockets/baileys');
+} from '@whiskeysockets/baileys';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const router = express.Router();
 
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
@@ -22,6 +28,7 @@ router.get('/', async (req, res) => {
     let done = false;
 
     async function MBUVI_MD_QR_CODE() {
+        if (!fs.existsSync('./temp')) fs.mkdirSync('./temp', { recursive: true });
         const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
         const { version } = await fetchLatestBaileysVersion();
 
@@ -106,7 +113,7 @@ router.get('/', async (req, res) => {
 
         } catch (err) {
             if (!res.headersSent) {
-                await res.json({ code: 'Service is Currently Unavailable' });
+                res.json({ code: 'Service is Currently Unavailable' });
             }
             console.log('QR error:', err.message);
             await removeFile('temp/' + id);
@@ -116,4 +123,4 @@ router.get('/', async (req, res) => {
     return await MBUVI_MD_QR_CODE();
 });
 
-module.exports = router;
+export default router;

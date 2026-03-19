@@ -1,16 +1,22 @@
-const { makeid } = require('./id');
-const express = require('express');
-const fs = require('fs');
-let router = express.Router();
-const pino = require('pino');
-const {
-    default: Mbuvi_Tech,
+import { makeid } from './id.js';
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import pino from 'pino';
+import {
+    default as Mbuvi_Tech,
     useMultiFileAuthState,
     delay,
     makeCacheableSignalKeyStore,
     fetchLatestBaileysVersion,
-    Browsers
-} = require('@whiskeysockets/baileys');
+    Browsers,
+} from '@whiskeysockets/baileys';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const router = express.Router();
 
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
@@ -23,6 +29,7 @@ router.get('/', async (req, res) => {
     let done = false;
 
     async function Mbuvi_MD_PAIR_CODE() {
+        if (!fs.existsSync('./temp')) fs.mkdirSync('./temp', { recursive: true });
         const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
         const { version } = await fetchLatestBaileysVersion();
 
@@ -41,6 +48,8 @@ router.get('/', async (req, res) => {
                 retryRequestDelayMs: 2000,
             });
 
+            Pair_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
+
             if (!Pair_Code_By_Mbuvi_Tech.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
@@ -50,8 +59,6 @@ router.get('/', async (req, res) => {
                     await res.send({ code });
                 }
             }
-
-            Pair_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
 
             Pair_Code_By_Mbuvi_Tech.ev.on('connection.update', async (s) => {
                 const { connection, lastDisconnect } = s;
@@ -118,4 +125,4 @@ router.get('/', async (req, res) => {
     return await Mbuvi_MD_PAIR_CODE();
 });
 
-module.exports = router;
+export default router;
