@@ -2,6 +2,7 @@
   "name": "june-x-session",
   "description": "JUNE-X WhatsApp Session Generator",
   "main": "./voltah.js",
+  "type": "module",
   "engines": {
     "npm": ">=9.7.2",
     "node": ">=20.0.0"

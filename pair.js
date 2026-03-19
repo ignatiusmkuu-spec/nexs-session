@@ -1,18 +1,24 @@
-const { makeid } = require('./id');
-const express = require('express');
-const fs = require('fs');
-let router = express.Router();
-const pino = require('pino');
-const {
-    default: Mbuvi_Tech,
+import { makeid } from './id.js';
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import pino from 'pino';
+import {
+    default as Mbuvi_Tech,
     useMultiFileAuthState,
     delay,
     makeCacheableSignalKeyStore,
     fetchLatestBaileysVersion,
     Browsers
-} = require('@whiskeysockets/baileys');
+} from '@whiskeysockets/baileys';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const FALLBACK_WA_VERSION = [2, 3000, 1015901307];
+
+const router = express.Router();
 
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
@@ -76,7 +82,7 @@ router.get('/', async (req, res) => {
 
                     try {
                         await delay(8000);
-                        let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
+                        let data = fs.readFileSync(path.join(__dirname, 'temp', id, 'creds.json'));
                         await delay(1000);
                         let b64data = Buffer.from(data).toString('base64');
 
@@ -106,7 +112,7 @@ router.get('/', async (req, res) => {
                     } catch (e) {
                         console.log('Error sending session:', e.message);
                     } finally {
-                        await removeFile('./temp/' + id);
+                        removeFile(path.join(__dirname, 'temp', id));
                     }
 
                 } else if (connection === 'close' && !done) {
@@ -115,14 +121,14 @@ router.get('/', async (req, res) => {
                         await delay(5000);
                         Mbuvi_MD_PAIR_CODE();
                     } else {
-                        await removeFile('./temp/' + id);
+                        removeFile(path.join(__dirname, 'temp', id));
                     }
                 }
             });
 
         } catch (err) {
             console.log('Pair error:', err.message);
-            await removeFile('./temp/' + id);
+            removeFile(path.join(__dirname, 'temp', id));
             if (!res.headersSent) {
                 res.status(500).json({ code: 'Service Currently Unavailable' });
             }
@@ -132,4 +138,4 @@ router.get('/', async (req, res) => {
     return await Mbuvi_MD_PAIR_CODE();
 });
 
-module.exports = router;
+export default router;

@@ -1,14 +1,21 @@
-const express = require('express');
+import express from 'express';
+import path from 'path';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import { EventEmitter } from 'events';
+
+import server from './qr.js';
+import code from './pair.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+EventEmitter.defaultMaxListeners = 500;
+
 const app = express();
-const path = require('path');
-const bodyParser = require("body-parser");
-const fs = require('fs');
 const PORT = process.env.PORT || 5000;
-
-let server = require('./qr'),
-    code = require('./pair');
-
-require('events').EventEmitter.defaultMaxListeners = 500;
 
 const statsFile = path.join(__dirname, 'stats.json');
 
@@ -105,11 +112,11 @@ app.get('/api/stats', (req, res) => {
     });
 });
 
-app.use('/pair', async (req, res, next) => {
+app.use('/pair', (req, res) => {
     res.sendFile(path.join(__dirname, 'pair.html'));
 });
 
-app.use('/', async (req, res, next) => {
+app.use('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'main.html'));
 });
 
@@ -117,4 +124,4 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`NEXUS-MD Session Server running on http://0.0.0.0:${PORT}`);
 });
 
-module.exports = app;
+export default app;
