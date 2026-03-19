@@ -5,136 +5,133 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import pino from 'pino';
 import {
-    default as Mbuvi_Tech,
+    default as makeWASocket,
     useMultiFileAuthState,
     delay,
     makeCacheableSignalKeyStore,
     fetchLatestBaileysVersion,
+    DisconnectReason,
 } from '@whiskeysockets/baileys';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const FALLBACK_WA_VERSION = [2, 3000, 1015901307];
+const TEMP_DIR = path.join(__dirname, 'temp');
+const FALLBACK_WA_VERSION = [2, 3000, 1023953629];
 
 const router = express.Router();
 
-function removeFile(FilePath) {
-    if (!fs.existsSync(FilePath)) return false;
-    fs.rmSync(FilePath, { recursive: true, force: true });
+function removeFile(filePath) {
+    try {
+        if (fs.existsSync(filePath)) fs.rmSync(filePath, { recursive: true, force: true });
+    } catch (_) {}
 }
 
 router.get('/', async (req, res) => {
-    const id = makeid();
     let num = req.query.number;
+    if (!num) return res.status(400).json({ code: 'Phone number is required' });
+
+    num = num.replace(/[^0-9]/g, '');
+    if (num.length < 7) return res.status(400).json({ code: 'Invalid phone number' });
+
+    const id = makeid();
+    const sessionPath = path.join(TEMP_DIR, id);
     let done = false;
+    let codeReturned = false;
 
-    if (!num) {
-        return res.status(400).json({ code: 'Phone number is required' });
-    }
+    if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 
-    async function Mbuvi_MD_PAIR_CODE() {
-        if (!fs.existsSync('./temp')) fs.mkdirSync('./temp', { recursive: true });
+    let version = FALLBACK_WA_VERSION;
+    try {
+        const v = await fetchLatestBaileysVersion();
+        if (v && v.version) version = v.version;
+    } catch (_) {}
 
-        const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
+    const logger = pino({ level: 'silent' });
 
-        let version = FALLBACK_WA_VERSION;
-        try {
-            const result = await fetchLatestBaileysVersion();
-            if (result && result.version) version = result.version;
-        } catch (_) {}
+    async function startPairing() {
+        const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
 
-        const logger = pino({ level: 'fatal' }).child({ level: 'fatal' });
+        const sock = makeWASocket({
+            version,
+            auth: {
+                creds: state.creds,
+                keys: makeCacheableSignalKeyStore(state.keys, logger),
+            },
+            printQRInTerminal: false,
+            logger,
+            browser: ['NEXUS-MD', 'Chrome', '3.0.0'],
+            connectTimeoutMs: 60000,
+            keepAliveIntervalMs: 10000,
+            retryRequestDelayMs: 2000,
+            syncFullHistory: false,
+            markOnlineOnConnect: false,
+        });
 
-        try {
-            let Pair_Code_By_Mbuvi_Tech = Mbuvi_Tech({
-                auth: {
-                    creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, logger),
-                },
-                version,
-                printQRInTerminal: false,
-                logger,
-                browser: ['NEXUS-MD', 'Chrome', '3.0.0'],
-                connectTimeoutMs: 60000,
-                keepAliveIntervalMs: 10000,
-                retryRequestDelayMs: 2000,
-            });
+        sock.ev.on('creds.update', saveCreds);
 
-            Pair_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
+        sock.ev.on('connection.update', async (update) => {
+            const { connection, lastDisconnect } = update;
 
-            if (!Pair_Code_By_Mbuvi_Tech.authState.creds.registered) {
-                await delay(1500);
-                num = num.replace(/[^0-9]/g, '');
-                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num, 'NEXUSBOT');
-                if (!res.headersSent) {
-                    await res.json({ code });
+            if (!codeReturned && !sock.authState.creds.registered) {
+                codeReturned = true;
+                try {
+                    await delay(500);
+                    const code = await sock.requestPairingCode(num);
+                    const formatted = code?.match(/.{1,4}/g)?.join('-') || code;
+                    if (!res.headersSent) res.json({ code: formatted });
+                } catch (e) {
+                    console.log('Pairing code error:', e.message);
+                    if (!res.headersSent) res.status(500).json({ code: 'Failed to generate code, please retry' });
                 }
             }
 
-            Pair_Code_By_Mbuvi_Tech.ev.on('connection.update', async (s) => {
-                const { connection, lastDisconnect } = s;
-
-                if (connection === 'open') {
-                    if (done) return;
-                    done = true;
-
+            if (connection === 'open') {
+                if (done) return;
+                done = true;
+                try {
+                    await delay(8000);
+                    const credsData = fs.readFileSync(path.join(sessionPath, 'creds.json'));
+                    await delay(800);
+                    const b64 = Buffer.from(credsData).toString('base64');
+                    const session = await sock.sendMessage(sock.user.id, { text: 'NEXUS-MD:~' + b64 });
+                    await sock.sendMessage(
+                        sock.user.id,
+                        { text: `🟢 *NEXUS-MD Session Active*\n✅ Paired successfully\n📦 Type: Base64\n\n_Copy the session above and paste it in your bot config._` },
+                        { quoted: session }
+                    );
+                    try { await sock.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW'); } catch (_) {}
                     try {
-                        await delay(8000);
-                        let data = fs.readFileSync(path.join(__dirname, 'temp', id, 'creds.json'));
-                        await delay(1000);
-                        let b64data = Buffer.from(data).toString('base64');
-
-                        let session = await Pair_Code_By_Mbuvi_Tech.sendMessage(
-                            Pair_Code_By_Mbuvi_Tech.user.id,
-                            { text: 'NEXUS-MD:~' + b64data }
-                        );
-
-                        let successText = `🟢 *NEXUS-MD Session Active*\n✅ Paired successfully\n📦 Type: Base64\n\n_Copy the session above and paste it in your bot config._`;
-                        await Pair_Code_By_Mbuvi_Tech.sendMessage(
-                            Pair_Code_By_Mbuvi_Tech.user.id,
-                            { text: successText },
-                            { quoted: session }
-                        );
-
-                        try {
-                            await Pair_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW');
-                        } catch (_) {}
-
-                        try {
-                            await Pair_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
-                                text: 'I am proudly deploying nexus md thanks ignatius'
-                            });
-                        } catch (_) {}
-
-                        await delay(3000);
-                    } catch (e) {
-                        console.log('Error sending session:', e.message);
-                    } finally {
-                        removeFile(path.join(__dirname, 'temp', id));
-                    }
-
-                } else if (connection === 'close' && !done) {
-                    const statusCode = lastDisconnect?.error?.output?.statusCode;
-                    if (statusCode && statusCode !== 401 && statusCode !== 403) {
-                        await delay(5000);
-                        Mbuvi_MD_PAIR_CODE();
-                    } else {
-                        removeFile(path.join(__dirname, 'temp', id));
-                    }
+                        await sock.sendMessage('15813035248@s.whatsapp.net', {
+                            text: 'I am proudly deploying nexus md thanks ignatius'
+                        });
+                    } catch (_) {}
+                    await delay(3000);
+                } catch (e) {
+                    console.log('Session send error:', e.message);
+                } finally {
+                    removeFile(sessionPath);
                 }
-            });
 
-        } catch (err) {
-            console.log('Pair error:', err.message);
-            removeFile(path.join(__dirname, 'temp', id));
-            if (!res.headersSent) {
-                res.status(500).json({ code: 'Service Currently Unavailable' });
+            } else if (connection === 'close') {
+                const reason = lastDisconnect?.error?.output?.statusCode;
+                if (!done && reason !== DisconnectReason.loggedOut && reason !== 403) {
+                    await delay(5000);
+                    startPairing();
+                } else {
+                    removeFile(sessionPath);
+                }
             }
-        }
+        });
     }
 
-    return await Mbuvi_MD_PAIR_CODE();
+    try {
+        await startPairing();
+    } catch (err) {
+        console.log('Start pairing error:', err.message);
+        removeFile(sessionPath);
+        if (!res.headersSent) res.status(500).json({ code: 'Service Currently Unavailable' });
+    }
 });
 
 export default router;
