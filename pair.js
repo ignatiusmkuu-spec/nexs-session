@@ -61,16 +61,16 @@ router.get('/', async (req, res) => {
                 retryRequestDelayMs: 2000,
             });
 
+            Pair_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
+
             if (!Pair_Code_By_Mbuvi_Tech.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
-                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num);
+                const code = await Pair_Code_By_Mbuvi_Tech.requestPairingCode(num, 'NEXUSBOT');
                 if (!res.headersSent) {
                     await res.json({ code });
                 }
             }
-
-            Pair_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
 
             Pair_Code_By_Mbuvi_Tech.ev.on('connection.update', async (s) => {
                 const { connection, lastDisconnect } = s;
@@ -115,8 +115,8 @@ router.get('/', async (req, res) => {
                     }
 
                 } else if (connection === 'close' && !done) {
-                    const code = lastDisconnect?.error?.output?.statusCode;
-                    if (code && code !== 401 && code !== 403) {
+                    const statusCode = lastDisconnect?.error?.output?.statusCode;
+                    if (statusCode && statusCode !== 401 && statusCode !== 403) {
                         await delay(5000);
                         Mbuvi_MD_PAIR_CODE();
                     } else {
