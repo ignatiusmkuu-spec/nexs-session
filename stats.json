@@ -1,14 +1,15 @@
 {
-  "totalPairings": 20,
+  "totalPairings": 22,
   "qrPairings": 5,
-  "codePairings": 15,
+  "codePairings": 17,
   "startTime": 1771076481754,
   "dailyPairings": {
     "2026-02-14": 6,
-    "2026-03-19": 14
+    "2026-03-19": 14,
+    "2026-03-21": 2
   },
   "peakHour": 18,
   "countries": {
-    "254": 15
+    "254": 17
   }
 }

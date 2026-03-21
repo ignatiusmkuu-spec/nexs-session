@@ -10,6 +10,8 @@ import {
     delay,
     makeCacheableSignalKeyStore,
     fetchLatestBaileysVersion,
+    Browsers,
+    DisconnectReason,
 } from '@whiskeysockets/baileys';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -54,7 +56,7 @@ router.get('/', async (req, res) => {
                 version,
                 printQRInTerminal: false,
                 logger,
-                browser: ['NEXUS-MD', 'Firefox', '3.0.0'],
+                browser: Browsers.ubuntu('Chrome'),
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 10000,
                 retryRequestDelayMs: 2000,
@@ -111,12 +113,15 @@ router.get('/', async (req, res) => {
                     }
 
                 } else if (connection === 'close' && !done) {
-                    const code = lastDisconnect?.error?.output?.statusCode;
-                    if (code && code !== 401 && code !== 403) {
+                    const statusCode = lastDisconnect?.error?.output?.statusCode;
+                    const isLoggedOut = statusCode === DisconnectReason.loggedOut
+                        || statusCode === 401
+                        || statusCode === 403;
+                    if (isLoggedOut) {
+                        removeFile(sessionPath);
+                    } else {
                         await delay(5000);
                         Mbuvi_MD_PAIR_CODE();
-                    } else {
-                        removeFile(sessionPath);
                     }
                 }
             });
