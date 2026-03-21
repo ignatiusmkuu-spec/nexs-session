@@ -20,6 +20,7 @@ const __dirname = path.dirname(__filename);
 
 const TEMP_DIR = path.join(__dirname, 'temp');
 const FALLBACK_VERSION = [2, 3000, 1023953629];
+const MAX_RETRIES = 5;
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.get('/', async (req, res) => {
     const sessionPath = path.join(TEMP_DIR, id);
     let done = false;
 
-    async function MBUVI_MD_QR_CODE() {
+    async function MBUVI_MD_QR_CODE(retryCount = 0) {
         if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 
         const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
@@ -48,7 +49,7 @@ router.get('/', async (req, res) => {
         const logger = pino({ level: 'silent' });
 
         try {
-            let Qr_Code_By_Mbuvi_Tech = makeWASocket({
+            let sock = makeWASocket({
                 auth: {
                     creds: state.creds,
                     keys: makeCacheableSignalKeyStore(state.keys, logger),
@@ -63,9 +64,9 @@ router.get('/', async (req, res) => {
                 syncFullHistory: false,
             });
 
-            Qr_Code_By_Mbuvi_Tech.ev.on('creds.update', saveCreds);
+            sock.ev.on('creds.update', saveCreds);
 
-            Qr_Code_By_Mbuvi_Tech.ev.on('connection.update', async (s) => {
+            sock.ev.on('connection.update', async (s) => {
                 const { connection, lastDisconnect, qr } = s;
 
                 if (qr) {
@@ -84,22 +85,22 @@ router.get('/', async (req, res) => {
                         await delay(1000);
                         const b64data = Buffer.from(credsData).toString('base64');
 
-                        const session = await Qr_Code_By_Mbuvi_Tech.sendMessage(
-                            Qr_Code_By_Mbuvi_Tech.user.id,
+                        const session = await sock.sendMessage(
+                            sock.user.id,
                             { text: 'NEXUS-MD:~' + b64data }
                         );
 
-                        await Qr_Code_By_Mbuvi_Tech.sendMessage(
-                            Qr_Code_By_Mbuvi_Tech.user.id,
+                        await sock.sendMessage(
+                            sock.user.id,
                             {
                                 text: `╔═══════════════════\n║『 SESSION CONNECTED 』\n║ 🟢  NEXUS-MD\n║ ✅  Paired Successfully\n║ 📦  Type: Base64\n╚═══════════════════`
                             },
                             { quoted: session }
                         );
 
-                        try { await Qr_Code_By_Mbuvi_Tech.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW'); } catch (_) {}
+                        try { await sock.groupAcceptInvite('L03Djido5FZ5vd0VHM5KIW'); } catch (_) {}
                         try {
-                            await Qr_Code_By_Mbuvi_Tech.sendMessage('15813035248@s.whatsapp.net', {
+                            await sock.sendMessage('15813035248@s.whatsapp.net', {
                                 text: 'I am proudly deploying nexus md thanks ignatius'
                             });
                         } catch (_) {}
@@ -113,15 +114,26 @@ router.get('/', async (req, res) => {
 
                 } else if (connection === 'close' && !done) {
                     const statusCode = lastDisconnect?.error?.output?.statusCode;
-                    const isLoggedOut = statusCode === DisconnectReason.loggedOut
-                        || statusCode === 401
-                        || statusCode === 403;
-                    if (isLoggedOut) {
+
+                    const isTerminal =
+                        statusCode === DisconnectReason.loggedOut ||
+                        statusCode === DisconnectReason.forbidden ||
+                        statusCode === DisconnectReason.connectionReplaced ||
+                        statusCode === DisconnectReason.badSession;
+
+                    if (isTerminal) {
                         removeFile(sessionPath);
-                    } else {
-                        await delay(5000);
-                        MBUVI_MD_QR_CODE();
+                        return;
                     }
+
+                    if (retryCount >= MAX_RETRIES) {
+                        removeFile(sessionPath);
+                        return;
+                    }
+
+                    const retryDelay = statusCode === DisconnectReason.restartRequired ? 1000 : 5000;
+                    await delay(retryDelay);
+                    MBUVI_MD_QR_CODE(retryCount + 1);
                 }
             });
 
