@@ -114,7 +114,7 @@ router.get('/', async (req, res) => {
                     } catch (e) {
                         console.log('Error sending session:', e.message);
                     } finally {
-                        try { sock.ev.removeAllListeners(); sock.ws.close(); } catch (_) {}
+                        try { sock.ev.removeAllListeners(); sock.ws.terminate(); } catch (_) {}
                         removeFile(sessionPath);
                     }
 
