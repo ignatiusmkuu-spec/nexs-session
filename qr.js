@@ -80,10 +80,10 @@ router.get('/', async (req, res) => {
                     done = true;
 
                     try {
-                        await delay(8000);
-                        const credsData = fs.readFileSync(path.join(sessionPath, 'creds.json'));
-                        await delay(1000);
-                        const b64data = Buffer.from(credsData).toString('base64');
+                        await delay(5000);
+                        await saveCreds();
+                        await delay(2000);
+                        const b64data = Buffer.from(JSON.stringify(state.creds)).toString('base64');
 
                         const session = await sock.sendMessage(
                             sock.user.id,
